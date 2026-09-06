@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08111d">
-<title>Nova Fantasy Draft War Room 2026 — League-Aware</title>
+<title>Nova Fantasy Draft War Room 2026 — League-Aware V3</title>
 <style>
 :root{
   --bg:#07101b;--panel:#0d1928;--panel2:#111f31;--text:#f5f7fb;--muted:#96a7bb;
@@ -85,7 +85,7 @@ input[type=range]{width:100%}.footer-note{font-size:11px;color:#788ca3;line-heig
 <body>
 <div class="shell">
   <div class="hero">
-    <div class="brand"><div class="logo">N</div><div><h1>Nova Draft War Room 2026</h1><div class="sub">League-aware • 10-team snake • ESPN H2H • Pick 6</div></div></div>
+    <div class="brand"><div class="logo">N</div><div><h1>Nova Draft War Room 2026</h1><div class="sub">League-aware • 10-team snake • ESPN H2H • Pick 6 • Fast Simulation</div></div></div>
     <div class="hero-actions"><button class="btn small" onclick="undoLast()">↶ Undo</button><button class="btn small primary" onclick="showTab('clock')">⚡ On Clock</button></div>
   </div>
 
@@ -112,7 +112,7 @@ input[type=range]{width:100%}.footer-note{font-size:11px;color:#788ca3;line-heig
     </div>
     <div class="panel">
       <h2>Record the Current Pick</h2>
-      <div class="callout" id="currentTurnExplain"></div>
+      <div class="callout" id="currentTurnExplain" style="font-size:15px"></div>
       <div style="height:10px"></div>
       <div class="toolbar">
         <input id="quickSearch" class="input" placeholder="Search the player who was just drafted" oninput="renderQuickResults()">
@@ -349,37 +349,85 @@ function deterministicNoise(seed){
   let h=2166136261;for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619)}
   return ((h>>>0)%10000)/10000
 }
+
+/*
+  FAST LEAGUE SIMULATION
+  ----------------------
+  V2 used the full player model inside every simulated opponent pick, and then
+  ran a second candidate-by-candidate future simulation. That was accurate in
+  spirit but far too computationally expensive for a phone/browser.
+  V3 keeps the league-awareness while using a lightweight opponent-pick model.
+*/
+function quickPredictScore(p,slot,actions,trial){
+  const c=countsFor(slot,actions),r=state.config.roster,rd=roundOf(actions.length+1);
+  const need=starterNeedFor(slot,p.pos,actions);
+  let s=baseWeighted(p)+scoringAdj(p);
+
+  // Strongly prefer open starters, then depth at RB/WR.
+  s+=Math.min(8.5,need*4.0);
+  if(["RB","WR"].includes(p.pos))s+=Math.max(0,3-c[p.pos])*.65;
+
+  // Avoid duplicate early QB/TE and early K/DST.
+  if(p.pos==="QB"&&c.QB>=r.QB)s-=rd<10?9:4;
+  if(p.pos==="TE"&&c.TE>=r.TE)s-=rd<9?7:3;
+  if((p.pos==="DST"||p.pos==="K")&&rd<11)s-=24;
+  else if((p.pos==="DST"||p.pos==="K")&&rd<13)s-=9;
+
+  // Market/ADP is only a behavioral prediction input, not the user's ranking.
+  const pick=actions.length+1, delta=pick-p.adp;
+  if(delta>0)s+=Math.min(4.5,delta*.10);
+  if(delta<-10)s-=Math.min(7,(-delta-10)*.12);
+
+  // Stable manager preferences plus small trial variation.
+  s+=(deterministicNoise(`mgr|${slot}|${p.pos}`)-.5)*3.0;
+  s+=(deterministicNoise(`trial|${trial}|${slot}|${p.id}`)-.5)*5.0;
+  return s
+}
 function predictedPick(slot,actions,trial){
   const av=available(actions);if(!av.length)return null;
   let best=null,bestS=-1e9;
   for(const p of av){
-    let s=playerScoreForManager(p,slot,actions,true);
-    // Small deterministic "manager personality" and trial variability.
-    s+=(deterministicNoise(`${slot}|${p.id}|${trial}`)-.5)*6.5;
-    // Slight positional preference variation by manager.
-    const pref=(deterministicNoise(`pref|${slot}|${p.pos}`)-.5)*2.8;
-    s+=pref;
+    const s=quickPredictScore(p,slot,actions,trial);
     if(s>bestS){bestS=s;best=p}
   }
   return best
 }
-function simulateToHerNext(candidate, trials=60){
-  const startActions=state.actions.slice();
-  const userSlot=state.config.slot;
-  const pickNow=currentPick();
-  if(managerSlotAt(pickNow)!==userSlot)return {survival:{},expectedNext:0,mostTaken:{},teamsLikely:{}};
 
-  const baseAction={kind:"mine",manager:userSlot,playerId:candidate.id,pick:pickNow,ts:0};
-  const target=nextPickForSlot(userSlot,pickNow+1);
-  if(!target)return {survival:{},expectedNext:0,mostTaken:{},teamsLikely:{}};
+let simCache={key:null,data:null};
+let leagueCache={key:null,data:null};
+let rankCache={key:null,list:null,map:null};
 
-  const candidatePool=available(startActions).filter(p=>p.id!==candidate.id).slice();
-  const survivedCount={}; const takenBy={}; let expectedNext=0;
-  candidatePool.forEach(p=>survivedCount[p.id]=0);
+function stateKey(){
+  return state.actions.map(a=>`${a.manager}:${a.playerId||"x"}`).join("|")+"|"+
+    JSON.stringify(state.config)+"|"+JSON.stringify(state.weights);
+}
+function invalidateCaches(){
+  simCache={key:null,data:null};
+  leagueCache={key:null,data:null};
+  rankCache={key:null,list:null,map:null};
+}
+function currentSimulationData(){
+  const key=stateKey();
+  if(simCache.key===key)return simCache.data;
+
+  const userSlot=state.config.slot,pickNow=currentPick();
+  const target=nextPickForSlot(userSlot,pickNow+(managerSlotAt(pickNow)===userSlot?1:0));
+  const trials=(window.innerWidth<=820?18:28);
+  const survivedCount={},takenBy={};
+  const av0=available();
+  av0.forEach(p=>survivedCount[p.id]=0);
+
+  if(!target){
+    const data={survival:{},takenBy:{},target:null,trials};
+    simCache={key,data};return data
+  }
 
   for(let t=0;t<trials;t++){
-    let acts=startActions.concat([baseAction]);
-    for(let n=pickNow+1;n<target;n++){
+    let acts=state.actions.slice();
+    let start=pickNow;
+    if(managerSlotAt(start)===userSlot)start++;
+
+    for(let n=start;n<target;n++){
       const slot=managerSlotAt(n);
       const pick=predictedPick(slot,acts,t);
       if(!pick)break;
@@ -387,80 +435,117 @@ function simulateToHerNext(candidate, trials=60){
       if(!takenBy[pick.id])takenBy[pick.id]={};
       takenBy[pick.id][slot]=(takenBy[pick.id][slot]||0)+1;
     }
-    const remaining=available(acts);
-    remaining.forEach(p=>{if(survivedCount[p.id]!==undefined)survivedCount[p.id]++});
-    const top=remaining.map(p=>playerScoreForManager(p,userSlot,acts)).sort((a,b)=>b-a)[0]||0;
-    expectedNext+=top;
-  }
-  expectedNext/=trials;
-  const survival={};Object.keys(survivedCount).forEach(id=>survival[id]=Math.round(survivedCount[id]/trials*100));
-  return {survival,expectedNext,takenBy,target}
-}
-let simCache={key:null,data:null};
-function currentSimulationData(){
-  const key=state.actions.map(a=>a.playerId||"x").join("|")+"|"+JSON.stringify(state.config)+"|"+JSON.stringify(state.weights);
-  if(simCache.key===key)return simCache.data;
-  // Baseline simulation without forcing a candidate: simulate intervening teams from now until her next pick.
-  const userSlot=state.config.slot,pickNow=currentPick(),target=nextPickForSlot(userSlot,pickNow+(managerSlotAt(pickNow)===userSlot?1:0));
-  const trials=70,survivedCount={},takenBy={};available().forEach(p=>survivedCount[p.id]=0);
-  if(!target){simCache={key,data:{survival:{},takenBy:{},target:null}};return simCache.data}
-  for(let t=0;t<trials;t++){
-    let acts=state.actions.slice();
-    let start=pickNow;
-    if(managerSlotAt(start)===userSlot)start++;
-    for(let n=start;n<target;n++){
-      const slot=managerSlotAt(n),pick=predictedPick(slot,acts,t);if(!pick)break;
-      acts.push({kind:"other",manager:slot,playerId:pick.id,pick:n,ts:0});
-      if(!takenBy[pick.id])takenBy[pick.id]={};
-      takenBy[pick.id][slot]=(takenBy[pick.id][slot]||0)+1;
+
+    const rem=available(acts);
+    for(const p of rem){
+      if(survivedCount[p.id]!==undefined)survivedCount[p.id]++;
     }
-    available(acts).forEach(p=>{if(survivedCount[p.id]!==undefined)survivedCount[p.id]++});
   }
-  const survival={};Object.keys(survivedCount).forEach(id=>survival[id]=Math.round(survivedCount[id]/trials*100));
-  simCache={key,data:{survival,takenBy,target}};return simCache.data
+
+  const survival={};
+  Object.keys(survivedCount).forEach(id=>survival[id]=Math.round(survivedCount[id]/trials*100));
+  const data={survival,takenBy,target,trials};
+  simCache={key,data};return data
 }
 function survivalProb(p){return currentSimulationData().survival[p.id]??50}
 function likelyTeamsFor(p){
-  const d=currentSimulationData().takenBy[p.id]||{};
-  return Object.entries(d).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([slot,n])=>({slot:Number(slot),pct:Math.round(n/70*100)}))
+  const sim=currentSimulationData(),d=sim.takenBy[p.id]||{},trials=sim.trials||1;
+  return Object.entries(d).sort((a,b)=>b[1]-a[1]).slice(0,3)
+    .map(([slot,n])=>({slot:Number(slot),pct:Math.round(n/trials*100)}))
 }
-function strongestOpponents(){
-  const arr=[];for(let s=1;s<=state.config.teams;s++){if(s!==state.config.slot)arr.push({slot:s,...teamStrength(s)})}
-  return arr.sort((a,b)=>b.overall-a.overall)
+function leagueContext(){
+  const key=stateKey();
+  if(leagueCache.key===key)return leagueCache.data;
+  const strengths={};
+  for(let s=1;s<=state.config.teams;s++)strengths[s]=teamStrength(s);
+  const opponents=Object.entries(strengths)
+    .filter(([s])=>Number(s)!==state.config.slot)
+    .map(([s,v])=>({slot:Number(s),...v}))
+    .sort((a,b)=>b.overall-a.overall);
+  const needs={};
+  for(let s=1;s<=state.config.teams;s++)needs[s]=teamNeedMap(s);
+  const data={strengths,opponents,needs};
+  leagueCache={key,data};return data
 }
+function strongestOpponents(){return leagueContext().opponents}
 function leagueDenialBonus(p){
-  const strong=strongestOpponents().slice(0,3);let bonus=0;
+  const ctx=leagueContext(), strong=ctx.opponents.slice(0,3);
+  const likely=likelyTeamsFor(p);
+  let bonus=0;
   for(const t of strong){
-    const need=teamNeedMap(t.slot)[p.pos]/100;
-    const likelihood=(likelyTeamsFor(p).find(x=>x.slot===t.slot)?.pct||0)/100;
-    bonus+=need*likelihood*(t.overall/100)*2.0;
+    const need=(ctx.needs[t.slot][p.pos]||0)/100;
+    const likelihood=(likely.find(x=>x.slot===t.slot)?.pct||0)/100;
+    bonus+=need*likelihood*(t.overall/100)*1.35;
   }
-  return Math.min(2.5,bonus)
+  return Math.min(1.35,bonus)
 }
-function futureFlexBonus(p){
-  if(managerSlotAt(currentPick())!==state.config.slot)return 0;
-  const sim=simulateToHerNext(p,36);
-  return clamp((sim.expectedNext-72)*.07,-1,2.2)
+function rosterFitAdjustment(p){
+  const slot=state.config.slot,c=countsFor(slot),r=state.config.roster,rd=roundOf(currentPick());
+  const need=starterNeedFor(slot,p.pos);
+  let x=Math.min(5.2,need*2.6);
+
+  if(p.pos==="QB"&&c.QB>=r.QB)x-=rd<10?6.5:3;
+  if(p.pos==="TE"&&c.TE>=r.TE)x-=rd<9?5:2.5;
+  if((p.pos==="DST"||p.pos==="K")&&rd<11)x-=16;
+  else if((p.pos==="DST"||p.pos==="K")&&rd<13)x-=7;
+
+  if(rd>=8&&["RB","WR"].includes(p.pos))x+=.7;
+  return x
+}
+function tierPreservationBonus(p){
+  // Fast approximation of future-board flexibility: reward thin tiers without
+  // running a full simulation for every candidate.
+  const sc=scarcityRaw(p);
+  return clamp((sc-65)*.022,-.5,.75)
 }
 function leagueAwareScore(p){
-  let s=playerScoreForManager(p,state.config.slot);
+  const key=stateKey();
+  if(rankCache.key===key && rankCache.map && rankCache.map[p.id]!==undefined)return rankCache.map[p.id];
+
+  const core=baseWeighted(p);
   const surv=survivalProb(p);
-  // Urgency: great players unlikely to return gain value.
-  s+=(50-surv)*.045;
-  // Blocking only as a secondary factor.
+  const urgency=(50-surv)*.028;
+  const adpDelta=currentPick()-p.adp;
+  const valueAdj=clamp(adpDelta*.035,-1.2,1.2);
+
+  // Compression prevents every elite player from pinning at 99.9.
+  let s=core*.93+3.0;
+  s+=rosterFitAdjustment(p);
+  s+=scoringAdj(p)*.55;
+  s+=tierPreservationBonus(p);
+  s+=urgency;
   s+=leagueDenialBonus(p);
-  // Preserve future flexibility by rewarding candidates that leave a good board later.
-  s+=futureFlexBonus(p);
-  return clamp(s,1,99.9)
+  s+=valueAdj;
+  s=clamp(s,1,98.8);
+  return s
 }
 function ranked(){
-  return available().map(p=>({...p,score:leagueAwareScore(p)})).sort((a,b)=>b.score-a.score)
+  const key=stateKey();
+  if(rankCache.key===key && rankCache.list)return rankCache.list;
+
+  // Build all scores once per draft state and reuse across all tabs.
+  const map={};
+  const list=available().map(p=>{
+    const core=baseWeighted(p);
+    const surv=survivalProb(p);
+    const urgency=(50-surv)*.028;
+    const adpDelta=currentPick()-p.adp;
+    const valueAdj=clamp(adpDelta*.035,-1.2,1.2);
+    let score=core*.93+3.0+rosterFitAdjustment(p)+scoringAdj(p)*.55+
+      tierPreservationBonus(p)+urgency+leagueDenialBonus(p)+valueAdj;
+    score=clamp(score,1,98.8);
+    map[p.id]=score;
+    return {...p,score}
+  }).sort((a,b)=>b.score-a.score);
+
+  rankCache={key,list,map};
+  return list
 }
 function explanation(p){
   const likely=likelyTeamsFor(p).filter(x=>x.pct>=10);
   const survival=survivalProb(p),need=teamNeedMap(state.config.slot)[p.pos];
   const pieces=[];
-  pieces.push(`${p.pos} fit for her roster is ${need>=60?"high":need>=30?"moderate":"currently low"}, while his league-aware value is ${leagueAwareScore(p).toFixed(1)}/100.`);
+  const cached=rankCache.map?.[p.id]??leagueAwareScore(p); pieces.push(`${p.pos} fit for her roster is ${need>=60?"high":need>=30?"moderate":"currently low"}, while his league-aware value is ${cached.toFixed(1)}/100.`);
   if(survival<=35)pieces.push(`The model gives him only about a ${survival}% chance to survive to her next pick, which creates urgency.`);
   else if(survival>=70)pieces.push(`He has about a ${survival}% chance to survive to her next pick, so waiting is more realistic.`);
   if(likely.length)pieces.push(`Most likely teams to take him before her next turn: ${likely.map(x=>`${state.teamNames[x.slot-1]} (${x.pct}%)`).join(", ")}.`);
@@ -470,7 +555,7 @@ function explanation(p){
 }
 
 function render(){
-  normalizeState();save();simCache.key=null;
+  normalizeState();save();
   const cp=currentPick(),cm=currentManager(),next=herNextPick(cp);
   document.getElementById("statPick").textContent=pickLabel(cp);
   document.getElementById("statTeam").textContent=state.teamNames[cm-1];
@@ -482,7 +567,7 @@ function render(){
 function renderClock(){
   const list=ranked(),best=list[0],box=document.getElementById("bestPick"),alts=document.getElementById("alternatives");
   const isHer=currentManager()===state.config.slot;
-  document.getElementById("currentTurnExplain").innerHTML=`Pick <b>${pickLabel(currentPick())}</b> belongs to <b>${state.teamNames[currentManager()-1]}</b>. ${isHer?"This is her selection. The recommendations below optimize her team against the full league.":"Record the player this manager drafts; the app will automatically place him on that roster."}`;
+  document.getElementById("currentTurnExplain").innerHTML=isHer?`🚨 <b>HER PICK — ${pickLabel(currentPick())}</b>. Choose her player from the recommendation above or search below.`:`⏳ <b>WAITING FOR ${state.teamNames[currentManager()-1].toUpperCase()} — ${pickLabel(currentPick())}</b>. Search below and tap the player they drafted.`;
   if(!best){box.innerHTML="<div class='muted'>No available players.</div>";alts.innerHTML="";return}
   const top=list.slice(0,10);
   const safest=[...top].sort((a,b)=>floorScore(b)-floorScore(a))[0];
@@ -556,8 +641,8 @@ function renderSettings(){
   document.getElementById("weights").innerHTML=Object.keys(state.weights).map(k=>`<div class="weightrow"><div>${LABELS[k]}</div><input type="range" min="0" max="40" step="1" value="${state.weights[k]}" oninput="setWeight('${k}',this.value)"><div><b>${state.weights[k]}</b></div></div>`).join("")
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function renameTeam(i,v){state.teamNames[i]=v.trim()||`Team ${i+1}`;render()}
-function setWeight(k,v){state.weights[k]=Number(v);render()}
+function renameTeam(i,v){state.teamNames[i]=v.trim()||`Team ${i+1}`;invalidateCaches();render()}
+function setWeight(k,v){state.weights[k]=Number(v);invalidateCaches();render()}
 function updateConfig(){
   const oldTeams=state.config.teams;
   state.config.teams=clamp(Number(document.getElementById("teams").value)||10,4,20);
@@ -567,18 +652,18 @@ function updateConfig(){
   while(state.teamNames.length<state.config.teams)state.teamNames.push(`Team ${state.teamNames.length+1}`);
   state.teamNames=state.teamNames.slice(0,state.config.teams);
   if(state.actions.length && oldTeams!==state.config.teams){alert("Team count changed after picks were recorded. Resetting is recommended because snake-pick ownership changes.");}
-  render()
+  invalidateCaches();render()
 }
 function draftPlayer(id){
   const p=state.players.find(x=>x.id===id);if(!p||goneSet().has(id))return;
   const manager=currentManager(),kind=manager===state.config.slot?"mine":"other";
-  state.actions.push({kind,manager,playerId:id,pick:currentPick(),ts:Date.now()});
+  state.actions.push({kind,manager,playerId:id,pick:currentPick(),ts:Date.now()});invalidateCaches();
   document.getElementById("quickSearch").value="";
   toast(`${p.name} → ${state.teamNames[manager-1]}`);render()
 }
-function advanceUnknown(){const manager=currentManager();state.actions.push({kind:"unknown",manager,playerId:null,pick:currentPick(),ts:Date.now()});toast(`Advanced ${state.teamNames[manager-1]}'s pick.`);render()}
-function undoLast(){if(!state.actions.length){toast("Nothing to undo.");return}const a=state.actions.pop();toast(`Undid pick ${pickLabel(a.pick)}.`);render()}
-function undoTo(pick){while(state.actions.length && state.actions[state.actions.length-1].pick>=pick)state.actions.pop();toast(`Rewound to pick ${pickLabel(pick)}.`);render()}
+function advanceUnknown(){const manager=currentManager();state.actions.push({kind:"unknown",manager,playerId:null,pick:currentPick(),ts:Date.now()});invalidateCaches();toast(`Advanced ${state.teamNames[manager-1]}'s pick.`);render()}
+function undoLast(){if(!state.actions.length){toast("Nothing to undo.");return}const a=state.actions.pop();invalidateCaches();toast(`Undid pick ${pickLabel(a.pick)}.`);render()}
+function undoTo(pick){while(state.actions.length && state.actions[state.actions.length-1].pick>=pick)state.actions.pop();invalidateCaches();toast(`Rewound to pick ${pickLabel(pick)}.`);render()}
 function showTab(id){document.querySelectorAll(".tabpage").forEach(x=>x.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab===id));window.scrollTo({top:0,behavior:"smooth"})}
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.classList.remove("show"),1900)}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
@@ -617,8 +702,8 @@ Keep it concise because she may be on the clock.`;
   })
 }
 function exportState(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="nova-draft-war-room-2026-state.json";a.click();URL.revokeObjectURL(a.href)}
-function importState(evt){const f=evt.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);normalizeState();render();toast("Draft state imported.")}catch(e){toast("Import failed.")}};r.readAsText(f)}
-function resetDraft(){if(!confirm("Reset all draft picks and settings?"))return;state=freshState();normalizeState();render();toast("Draft reset.")}
+function importState(evt){const f=evt.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);normalizeState();invalidateCaches();render();toast("Draft state imported.")}catch(e){toast("Import failed.")}};r.readAsText(f)}
+function resetDraft(){if(!confirm("Reset all draft picks and settings?"))return;state=freshState();normalizeState();invalidateCaches();render();toast("Draft reset.")}
 render();
 </script>
 </body>
