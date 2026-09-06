@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08111d">
+<title>Nova Fantasy Draft War Room 2026 — League-Aware</title>
+<style>
+:root{
+  --bg:#07101b;--panel:#0d1928;--panel2:#111f31;--text:#f5f7fb;--muted:#96a7bb;
+  --line:#21344b;--accent:#f1b43c;--accent2:#76c7ff;--good:#68d497;--bad:#ff7a84;
+  --shadow:0 16px 38px rgba(0,0,0,.28);--r:18px
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;background:linear-gradient(180deg,#07101b,#0a1422);color:var(--text);
+font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.shell{max-width:1240px;margin:auto;padding:14px 14px 100px}
+.hero{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 2px 12px}
+.brand{display:flex;gap:12px;align-items:center}.logo{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;
+background:linear-gradient(135deg,var(--accent),#ffd88a);color:#1b1305;font-weight:950;box-shadow:var(--shadow)}
+h1{font-size:20px;margin:0}.sub{font-size:12px;color:var(--muted);margin-top:3px}
+.hero-actions,.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 12px;border-radius:12px;font-weight:800}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#1c1407}.btn.good{background:rgba(104,212,151,.10);border-color:rgba(104,212,151,.35);color:#a9efc7}
+.btn.bad{background:rgba(255,122,132,.10);border-color:rgba(255,122,132,.35);color:#ffb5bb}.btn.ghost{background:transparent}.btn.small{padding:7px 9px;font-size:12px}
+.statbar{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:12px}
+.stat{background:rgba(17,31,49,.9);border:1px solid var(--line);border-radius:15px;padding:11px;box-shadow:var(--shadow)}
+.stat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}.stat .v{font-size:19px;font-weight:950;margin-top:2px}
+.nav{display:flex;gap:7px;overflow:auto;padding:5px 0 12px;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:9px 13px;border-radius:999px;font-weight:850}
+.tab.active{color:#171109;background:var(--accent);border-color:var(--accent)}
+.panel{background:rgba(13,25,40,.95);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+.panel h2{font-size:17px;margin:0 0 12px}.panel h3{font-size:14px;margin:0 0 8px}.muted{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:12px}
+.clockhero{background:linear-gradient(135deg,rgba(241,180,60,.14),rgba(118,199,255,.07));border:1px solid rgba(241,180,60,.36);padding:16px;border-radius:16px}
+.clocktag{font-size:11px;color:#ffda94;font-weight:950;letter-spacing:.8px;text-transform:uppercase}
+.pickname{font-size:28px;line-height:1.05;font-weight:950;margin:7px 0 5px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12px}.score{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-weight:950}
+.score b{font-size:27px;color:var(--accent)}.reason{margin:12px 0;color:#d9e2ee;line-height:1.48}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.badge{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:11px;font-weight:850;color:var(--muted)}
+.badge.good{color:#9cf0bd;border-color:rgba(104,212,151,.35);background:rgba(104,212,151,.07)}.badge.warn{color:#ffd28a;border-color:rgba(241,180,60,.35);background:rgba(241,180,60,.07)}
+.badge.risk{color:#ffadb3;border-color:rgba(255,122,132,.35);background:rgba(255,122,132,.07)}
+.player{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);background:#0d1a2a;border-radius:14px;padding:10px}
+.rank{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#15263a;font-weight:950;color:var(--accent)}
+.pname{font-weight:900}.pmeta{font-size:12px;color:var(--muted);margin-top:2px}.pscore{text-align:right}.pscore strong{font-size:18px}
+.altlist{display:grid;gap:8px}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.input,.select,.textarea{background:#081523;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 11px;outline:none}
+.input{flex:1;min-width:160px}.select{min-width:110px}.filters{display:flex;gap:6px;overflow:auto;padding-bottom:4px}
+.filter{border:1px solid var(--line);background:#0c1928;color:var(--muted);padding:7px 10px;border-radius:999px;font-weight:850;font-size:12px}.filter.active{background:#17324b;color:#dff2ff;border-color:#315879}
+.tablehead{display:grid;grid-template-columns:48px 1fr 64px 84px 168px;gap:8px;padding:0 8px 7px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.55px}
+.board{display:grid;gap:6px}.boardrow{display:grid;grid-template-columns:48px 1fr 64px 84px 168px;gap:8px;align-items:center;background:#0a1725;border:1px solid #1c2e43;border-radius:12px;padding:8px}
+.namecell{min-width:0}.namecell .pname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.avail{font-size:11px;color:var(--muted)}
+.teamgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.teamcard{border:1px solid var(--line);background:#0a1725;border-radius:15px;padding:12px;position:relative}
+.teamcard.me{border-color:rgba(241,180,60,.55);box-shadow:inset 0 0 0 1px rgba(241,180,60,.08)}
+.teamcard.current{outline:2px solid rgba(118,199,255,.55)}
+.teamtop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.teamname{font-weight:950}.teampos{font-size:11px;color:var(--muted);margin-top:2px}
+.strength{font-size:25px;font-weight:950;color:var(--accent)}.smallgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px}
+.metric{background:#0d1b2b;border:1px solid #1b3046;border-radius:10px;padding:7px}.metric span{display:block;font-size:9px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px}.metric b{font-size:14px}
+.rosterline{margin-top:9px;font-size:12px;line-height:1.5;color:#d5dfeb}.rosterline b{color:#fff}.needline{margin-top:8px}
+.needpill{display:inline-block;margin:2px 4px 2px 0;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:850;border:1px solid #29435f;color:#bdd8f1}
+.needpill.hot{border-color:rgba(255,122,132,.45);color:#ffb7bd;background:rgba(255,122,132,.06)}
+.callout{border-left:3px solid var(--accent2);padding:10px 12px;background:rgba(118,199,255,.06);border-radius:8px;color:#d8e8f7;line-height:1.48}
+.danger{border-left-color:var(--bad);background:rgba(255,122,132,.06)}
+.setupgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:850}.field input,.field select{width:100%}
+.sep{height:1px;background:var(--line);margin:14px 0}.weights{display:grid;gap:10px}.weightrow{display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center}
+input[type=range]{width:100%}.footer-note{font-size:11px;color:#788ca3;line-height:1.45;margin-top:10px}
+.draftlog{display:grid;gap:6px}.logrow{display:grid;grid-template-columns:58px 1fr auto;gap:8px;align-items:center;border-bottom:1px solid #182a3f;padding:7px 2px}.logpick{font-weight:900;color:var(--accent)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.66);display:none;place-items:end center;z-index:30}.modal.show{display:grid}.sheet{width:min(720px,100%);max-height:88vh;overflow:auto;background:#0c1827;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px;box-shadow:0 -20px 60px rgba(0,0,0,.4)}
+.sheettop{display:flex;justify-content:space-between;align-items:center;gap:12px}.sheet h2{margin:0}.close{border:none;background:#16273a;color:#fff;width:36px;height:36px;border-radius:12px;font-size:20px}
+.toast{position:fixed;left:50%;bottom:82px;transform:translateX(-50%) translateY(15px);background:#1b2b3f;border:1px solid #31475f;color:#fff;padding:10px 14px;border-radius:999px;opacity:0;pointer-events:none;transition:.2s;z-index:50;box-shadow:var(--shadow)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hidden{display:none!important}.bottomnav{display:none}
+@media(max-width:820px){
+  .shell{padding:10px 10px 92px}.statbar{grid-template-columns:repeat(2,1fr)}.statbar .stat:last-child{grid-column:1/3}
+  .grid2,.teamgrid{grid-template-columns:1fr}.tablehead{display:none}.boardrow{grid-template-columns:42px 1fr 60px}.boardrow .avail{display:none}.boardrow .actions{grid-column:2/4;justify-content:flex-start}
+  .setupgrid{grid-template-columns:repeat(2,1fr)}.weightrow{grid-template-columns:110px 1fr 38px}.nav{display:none}
+  .bottomnav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(6,15,26,.97);border-top:1px solid var(--line);z-index:15;padding-bottom:env(safe-area-inset-bottom)}
+  .bottomnav button{border:0;background:transparent;color:#8396aa;padding:10px 2px 7px;font-size:10px;font-weight:850}.bottomnav button.active{color:var(--accent)}.bottomnav .ico{display:block;font-size:18px;margin-bottom:2px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hero">
+    <div class="brand"><div class="logo">N</div><div><h1>Nova Draft War Room 2026</h1><div class="sub">League-aware • 10-team snake • ESPN H2H • Pick 6</div></div></div>
+    <div class="hero-actions"><button class="btn small" onclick="undoLast()">↶ Undo</button><button class="btn small primary" onclick="showTab('clock')">⚡ On Clock</button></div>
+  </div>
+
+  <div class="statbar">
+    <div class="stat"><div class="k">Current pick</div><div class="v" id="statPick">1.01</div></div>
+    <div class="stat"><div class="k">Team picking</div><div class="v" id="statTeam">Team 1</div></div>
+    <div class="stat"><div class="k">Her next pick</div><div class="v" id="statNext">1.06</div></div>
+    <div class="stat"><div class="k">Her strength</div><div class="v" id="statStrength">—</div></div>
+    <div class="stat"><div class="k">Players gone</div><div class="v" id="statGone">0</div></div>
+  </div>
+
+  <div class="nav">
+    <button class="tab active" data-tab="clock" onclick="showTab('clock')">⚡ Recommendation</button>
+    <button class="tab" data-tab="board" onclick="showTab('board')">🏈 Draft Board</button>
+    <button class="tab" data-tab="league" onclick="showTab('league')">👥 League Rosters</button>
+    <button class="tab" data-tab="strategy" onclick="showTab('strategy')">🧠 League Strategy</button>
+    <button class="tab" data-tab="settings" onclick="showTab('settings')">⚙️ Setup</button>
+  </div>
+
+  <section id="clock" class="tabpage">
+    <div class="grid2">
+      <div class="panel"><h2>Best Pick For Her Right Now</h2><div id="bestPick"></div></div>
+      <div class="panel"><h2>Next Best Options</h2><div id="alternatives" class="altlist"></div></div>
+    </div>
+    <div class="panel">
+      <h2>Record the Current Pick</h2>
+      <div class="callout" id="currentTurnExplain"></div>
+      <div style="height:10px"></div>
+      <div class="toolbar">
+        <input id="quickSearch" class="input" placeholder="Search the player who was just drafted" oninput="renderQuickResults()">
+        <button class="btn" onclick="advanceUnknown()">Unknown Player / Advance Pick</button>
+      </div>
+      <div id="quickResults" class="altlist"></div>
+      <div class="footer-note">Tap a player and the app automatically assigns him to the manager whose pick is currently on the clock. If you tap the wrong player, use Undo.</div>
+    </div>
+  </section>
+
+  <section id="board" class="tabpage hidden">
+    <div class="panel">
+      <h2>Available Players</h2>
+      <div class="toolbar">
+        <input id="search" class="input" placeholder="Search player or team" oninput="renderBoard()">
+        <select id="sortMode" class="select" onchange="renderBoard()"><option value="league">League-Aware Score</option><option value="base">Player Score</option><option value="adp">Market Pick</option><option value="ceiling">Ceiling</option></select>
+      </div>
+      <div class="filters" id="filters"></div>
+      <div class="tablehead"><div>#</div><div>Player</div><div>Score</div><div>Survival</div><div></div></div>
+      <div id="boardRows" class="board"></div>
+    </div>
+  </section>
+
+  <section id="league" class="tabpage hidden">
+    <div class="panel">
+      <h2>All 10 Rosters</h2>
+      <div class="callout">Every team is scored using starter quality, positional balance, bench depth, ceiling, and remaining roster needs. Her team is highlighted.</div>
+      <div style="height:10px"></div>
+      <div id="teamGrid" class="teamgrid"></div>
+    </div>
+    <div class="panel"><h2>Draft Log</h2><div id="draftLog" class="draftlog"></div></div>
+  </section>
+
+  <section id="strategy" class="tabpage hidden">
+    <div class="panel"><h2>League-Aware Strategy</h2><div id="strategyBody"></div></div>
+    <div class="panel">
+      <h2>Live ChatGPT Research Handoff</h2>
+      <div class="callout">This file evaluates the entire league locally. It cannot independently browse current injuries/news. Use the sync button to hand the exact draft state to ChatGPT for live schedule, coordinator, injury, and matchup research.</div>
+      <div style="height:10px"></div><button class="btn primary" onclick="copyAISync()">Copy Full League Sync Prompt</button>
+    </div>
+  </section>
+
+  <section id="settings" class="tabpage hidden">
+    <div class="panel">
+      <h2>League Setup</h2>
+      <div class="setupgrid">
+        <div class="field"><label>Teams</label><input id="teams" class="input" type="number" min="4" max="20" value="10" onchange="updateConfig()"></div>
+        <div class="field"><label>Her draft slot</label><input id="slot" class="input" type="number" min="1" max="20" value="6" onchange="updateConfig()"></div>
+        <div class="field"><label>Scoring</label><select id="scoring" class="select" onchange="updateConfig()"><option value="ppr">ESPN PPR</option><option value="half">Half PPR</option><option value="standard">Non-PPR</option></select></div>
+        <div class="field"><label>Bench</label><input id="rqBENCH" class="input" type="number" min="0" max="15" value="7" onchange="updateConfig()"></div>
+      </div>
+      <div class="sep"></div>
+      <div class="setupgrid">
+        <div class="field"><label>QB</label><input id="rqQB" class="input" type="number" value="1" min="0" max="3" onchange="updateConfig()"></div>
+        <div class="field"><label>RB</label><input id="rqRB" class="input" type="number" value="2" min="0" max="5" onchange="updateConfig()"></div>
+        <div class="field"><label>WR</label><input id="rqWR" class="input" type="number" value="2" min="0" max="5" onchange="updateConfig()"></div>
+        <div class="field"><label>TE</label><input id="rqTE" class="input" type="number" value="1" min="0" max="3" onchange="updateConfig()"></div>
+        <div class="field"><label>FLEX</label><input id="rqFLEX" class="input" type="number" value="1" min="0" max="4" onchange="updateConfig()"></div>
+        <div class="field"><label>D/ST</label><input id="rqDST" class="input" type="number" value="1" min="0" max="2" onchange="updateConfig()"></div>
+        <div class="field"><label>K</label><input id="rqK" class="input" type="number" value="1" min="0" max="2" onchange="updateConfig()"></div>
+      </div>
+    </div>
+    <div class="panel"><h2>Rename Managers</h2><div id="teamNames" class="setupgrid"></div></div>
+    <div class="panel">
+      <h2>Algorithm Weights</h2>
+      <div class="weights" id="weights"></div>
+      <div class="footer-note">League-awareness is layered on top: opponent roster needs, turn order, tier scarcity, probability of being drafted before her next pick, opponent strength, and simulated future-board value.</div>
+    </div>
+    <div class="panel">
+      <h2>Data</h2>
+      <div class="actions"><button class="btn" onclick="exportState()">Export Draft State</button><button class="btn" onclick="document.getElementById('importFile').click()">Import State</button><input id="importFile" class="hidden" type="file" accept=".json" onchange="importState(event)"><button class="btn bad" onclick="resetDraft()">Reset Draft</button></div>
+    </div>
+  </section>
+</div>
+
+<div class="bottomnav">
+  <button class="active" data-tab="clock" onclick="showTab('clock')"><span class="ico">⚡</span>Pick</button>
+  <button data-tab="board" onclick="showTab('board')"><span class="ico">🏈</span>Board</button>
+  <button data-tab="league" onclick="showTab('league')"><span class="ico">👥</span>League</button>
+  <button data-tab="strategy" onclick="showTab('strategy')"><span class="ico">🧠</span>Strategy</button>
+  <button data-tab="settings" onclick="showTab('settings')"><span class="ico">⚙️</span>Setup</button>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="sheet"><div class="sheettop"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+
+<script>
+const STARTER_PLAYERS = [{"name": "Jahmyr Gibbs", "pos": "RB", "team": "DET", "adp": 1, "quality": 98, "risk": 18, "passRole": 0.82, "note": "Elite dual-threat RB profile with week-winning ceiling.", "production": 99, "history": 99, "role": 94.7, "offense": 94.7, "scheme": 89.2, "schedule": 65.5, "playoffs": 64.7, "durability": 82}, {"name": "Bijan Robinson", "pos": "RB", "team": "ATL", "adp": 2, "quality": 98, "risk": 16, "passRole": 0.78, "note": "Three-down profile with elite volume and receiving upside.", "production": 97.1, "history": 99, "role": 94.7, "offense": 92.3, "scheme": 87.1, "schedule": 61.1, "playoffs": 71.4, "durability": 84}, {"name": "Ja'Marr Chase", "pos": "WR", "team": "CIN", "adp": 3, "quality": 97, "risk": 14, "passRole": 1.0, "note": "Alpha target share and elite touchdown/yardage ceiling.", "production": 94.2, "history": 96.6, "role": 92.1, "offense": 98.9, "scheme": 98.1, "schedule": 81.9, "playoffs": 78.1, "durability": 86}, {"name": "Puka Nacua", "pos": "WR", "team": "LAR", "adp": 4, "quality": 97, "risk": 15, "passRole": 1.0, "note": "High-volume receiving profile with strong weekly floor.", "production": 99, "history": 98.1, "role": 94.8, "offense": 99, "scheme": 98.7, "schedule": 66.1, "playoffs": 78.4, "durability": 85}, {"name": "Jaxon Smith-Njigba", "pos": "WR", "team": "SEA", "adp": 5, "quality": 95, "risk": 16, "passRole": 1.0, "note": "Ascending target-earner with elite volume potential.", "production": 95.0, "history": 95.1, "role": 97.7, "offense": 93.2, "scheme": 97.6, "schedule": 64.0, "playoffs": 77.8, "durability": 84}, {"name": "Jonathan Taylor", "pos": "RB", "team": "IND", "adp": 6, "quality": 95, "risk": 18, "passRole": 0.45, "note": "Workhorse rushing profile with strong touchdown equity.", "production": 91.3, "history": 96.2, "role": 99, "offense": 90.2, "scheme": 88.2, "schedule": 74.8, "playoffs": 67.6, "durability": 82}, {"name": "Amon-Ra St. Brown", "pos": "WR", "team": "DET", "adp": 7, "quality": 95, "risk": 12, "passRole": 1.0, "note": "Extremely stable target volume and high weekly floor.", "production": 97.3, "history": 97.2, "role": 96.0, "offense": 91.7, "scheme": 86.2, "schedule": 67.6, "playoffs": 76.8, "durability": 88}, {"name": "Christian McCaffrey", "pos": "RB", "team": "SF", "adp": 8, "quality": 94, "risk": 34, "passRole": 0.9, "note": "Massive per-game ceiling; durability creates extra risk.", "production": 93.8, "history": 91.7, "role": 92.2, "offense": 88.9, "scheme": 89.1, "schedule": 63.3, "playoffs": 71.5, "durability": 66}, {"name": "James Cook III", "pos": "RB", "team": "BUF", "adp": 9, "quality": 94, "risk": 16, "passRole": 0.58, "note": "Explosive runner tied to a strong scoring environment.", "production": 90.0, "history": 89.3, "role": 97.0, "offense": 87.8, "scheme": 95.3, "schedule": 78.3, "playoffs": 68.8, "durability": 84}, {"name": "CeeDee Lamb", "pos": "WR", "team": "DAL", "adp": 10, "quality": 94, "risk": 15, "passRole": 1.0, "note": "Elite target earner with overall WR1 upside.", "production": 94.6, "history": 90.3, "role": 93.1, "offense": 95.3, "scheme": 88.9, "schedule": 75.0, "playoffs": 65.2, "durability": 85}, {"name": "Justin Jefferson", "pos": "WR", "team": "MIN", "adp": 11, "quality": 94, "risk": 20, "passRole": 1.0, "note": "Generational receiving talent with matchup-proof ceiling.", "production": 93.2, "history": 93.7, "role": 99, "offense": 84.2, "scheme": 87.3, "schedule": 72.0, "playoffs": 74.0, "durability": 80}, {"name": "De'Von Achane", "pos": "RB", "team": "MIA", "adp": 12, "quality": 93, "risk": 29, "passRole": 0.92, "note": "Explosive efficiency and receiving work; workload risk matters.", "production": 93.1, "history": 88.7, "role": 90.2, "offense": 94.9, "scheme": 90.5, "schedule": 76.8, "playoffs": 75.2, "durability": 71}, {"name": "Omarion Hampton", "pos": "RB", "team": "LAC", "adp": 13, "quality": 92, "risk": 18, "passRole": 0.58, "note": "Young feature-back profile with high-volume upside.", "production": 93.8, "history": 86.0, "role": 89.2, "offense": 82.0, "scheme": 83.3, "schedule": 69.3, "playoffs": 72.2, "durability": 82}, {"name": "Chase Brown", "pos": "RB", "team": "CIN", "adp": 14, "quality": 92, "risk": 17, "passRole": 0.73, "note": "Strong all-purpose role in a high-scoring offense.", "production": 95.6, "history": 89.4, "role": 93.1, "offense": 93.9, "scheme": 93.1, "schedule": 75.5, "playoffs": 80.0, "durability": 83}, {"name": "Saquon Barkley", "pos": "RB", "team": "PHI", "adp": 15, "quality": 91, "risk": 22, "passRole": 0.55, "note": "Elite talent and scoring environment with heavy-use history.", "production": 89.9, "history": 87.3, "role": 95.0, "offense": 88.7, "scheme": 89.2, "schedule": 78.7, "playoffs": 74.1, "durability": 78}, {"name": "Derrick Henry", "pos": "RB", "team": "BAL", "adp": 16, "quality": 90, "risk": 26, "passRole": 0.2, "note": "Touchdown machine with age and receiving-volume tradeoffs.", "production": 89.9, "history": 92.1, "role": 90.1, "offense": 81.5, "scheme": 83.1, "schedule": 80.0, "playoffs": 76.7, "durability": 74}, {"name": "Ashton Jeanty", "pos": "RB", "team": "LV", "adp": 17, "quality": 90, "risk": 19, "passRole": 0.62, "note": "High-upside young back with three-down potential.", "production": 91.6, "history": 86.9, "role": 91.4, "offense": 85.5, "scheme": 82.3, "schedule": 76.8, "playoffs": 71.3, "durability": 81}, {"name": "Drake London", "pos": "WR", "team": "ATL", "adp": 18, "quality": 90, "risk": 15, "passRole": 1.0, "note": "Alpha receiver profile with premium red-zone usage.", "production": 87.4, "history": 86.1, "role": 94.9, "offense": 84.3, "scheme": 79.1, "schedule": 75.9, "playoffs": 68.7, "durability": 85}, {"name": "A.J. Brown", "pos": "WR", "team": "NE", "adp": 19, "quality": 89, "risk": 20, "passRole": 1.0, "note": "Physical alpha receiver with high weekly ceiling.", "production": 92.4, "history": 88.6, "role": 93.4, "offense": 86.5, "scheme": 88.2, "schedule": 72.5, "playoffs": 65.7, "durability": 80}, {"name": "Trey McBride", "pos": "TE", "team": "ARI", "adp": 20, "quality": 90, "risk": 14, "passRole": 1.0, "note": "Difference-making target volume at a scarce position.", "production": 87.5, "history": 91.5, "role": 93.3, "offense": 93.5, "scheme": 87.4, "schedule": 81.1, "playoffs": 80.0, "durability": 86}, {"name": "Brock Bowers", "pos": "TE", "team": "LV", "adp": 21, "quality": 90, "risk": 15, "passRole": 1.0, "note": "Elite receiving talent with positional advantage.", "production": 94.0, "history": 88.8, "role": 84.6, "offense": 85.5, "scheme": 82.3, "schedule": 83.4, "playoffs": 61.6, "durability": 85}, {"name": "Nico Collins", "pos": "WR", "team": "HOU", "adp": 22, "quality": 89, "risk": 19, "passRole": 1.0, "note": "Efficient vertical alpha with strong touchdown ceiling.", "production": 87.0, "history": 88.5, "role": 94.2, "offense": 86.4, "scheme": 79.0, "schedule": 63.6, "playoffs": 83.8, "durability": 81}, {"name": "Chris Olave", "pos": "WR", "team": "NO", "adp": 23, "quality": 88, "risk": 19, "passRole": 1.0, "note": "Target-commanding route winner with PPR appeal.", "production": 90.4, "history": 92.3, "role": 88.7, "offense": 90.2, "scheme": 83.8, "schedule": 71.6, "playoffs": 70.5, "durability": 81}, {"name": "Rashee Rice", "pos": "WR", "team": "KC", "adp": 24, "quality": 88, "risk": 24, "passRole": 1.0, "note": "Volume upside in a premium passing offense; monitor availability/news.", "production": 91.2, "history": 84.4, "role": 90.9, "offense": 82.2, "scheme": 87.2, "schedule": 83.3, "playoffs": 70.8, "durability": 76}, {"name": "Josh Allen", "pos": "QB", "team": "BUF", "adp": 25, "quality": 92, "risk": 13, "passRole": 0.0, "note": "Elite fantasy quarterback because of passing plus rushing touchdowns.", "production": 93.1, "history": 92.2, "role": 90.0, "offense": 85.8, "scheme": 93.3, "schedule": 71.6, "playoffs": 76.9, "durability": 87}, {"name": "George Pickens", "pos": "WR", "team": "DAL", "adp": 26, "quality": 87, "risk": 18, "passRole": 1.0, "note": "Big-play alpha profile with strong contested-catch ceiling.", "production": 89.7, "history": 90.8, "role": 89.0, "offense": 88.3, "scheme": 81.9, "schedule": 77.1, "playoffs": 65.6, "durability": 82}, {"name": "Kenneth Walker III", "pos": "RB", "team": "KC", "adp": 27, "quality": 87, "risk": 23, "passRole": 0.42, "note": "Explosive runner with premium scoring-environment upside.", "production": 86.0, "history": 84.9, "role": 88.3, "offense": 81.2, "scheme": 86.2, "schedule": 74.8, "playoffs": 67.7, "durability": 77}, {"name": "Garrett Wilson", "pos": "WR", "team": "NYJ", "adp": 28, "quality": 87, "risk": 18, "passRole": 1.0, "note": "High-end target share and route-winning ability.", "production": 87.1, "history": 88.7, "role": 84.7, "offense": 78.3, "scheme": 84.0, "schedule": 72.4, "playoffs": 62.6, "durability": 82}, {"name": "Breece Hall", "pos": "RB", "team": "NYJ", "adp": 29, "quality": 86, "risk": 21, "passRole": 0.82, "note": "Dual-threat ceiling with workload/context uncertainty.", "production": 86.0, "history": 89.2, "role": 89.4, "offense": 77.3, "scheme": 83.0, "schedule": 78.6, "playoffs": 65.3, "durability": 79}, {"name": "Kyren Williams", "pos": "RB", "team": "LAR", "adp": 30, "quality": 86, "risk": 20, "passRole": 0.48, "note": "Reliable volume in a productive offense.", "production": 87.2, "history": 84.7, "role": 82.3, "offense": 89.9, "scheme": 87.7, "schedule": 71.1, "playoffs": 78.8, "durability": 80}, {"name": "Malik Nabers", "pos": "WR", "team": "NYG", "adp": 31, "quality": 86, "risk": 25, "passRole": 1.0, "note": "Elite target talent with huge ceiling; context increases volatility.", "production": 89.4, "history": 89.1, "role": 85.9, "offense": 85.1, "scheme": 84.2, "schedule": 67.7, "playoffs": 65.3, "durability": 75}, {"name": "Javonte Williams", "pos": "RB", "team": "DAL", "adp": 32, "quality": 85, "risk": 19, "passRole": 0.5, "note": "Strong projected workload and touchdown opportunity.", "production": 85.1, "history": 80.6, "role": 79.2, "offense": 86.3, "scheme": 79.9, "schedule": 69.5, "playoffs": 71.4, "durability": 81}, {"name": "DeVonta Smith", "pos": "WR", "team": "PHI", "adp": 33, "quality": 85, "risk": 14, "passRole": 1.0, "note": "Efficient high-floor receiver with spike-week ceiling.", "production": 83.8, "history": 82.2, "role": 86.9, "offense": 82.7, "scheme": 83.2, "schedule": 66.8, "playoffs": 77.2, "durability": 86}, {"name": "Tetairoa McMillan", "pos": "WR", "team": "CAR", "adp": 34, "quality": 85, "risk": 18, "passRole": 1.0, "note": "Young alpha archetype with breakout potential.", "production": 83.5, "history": 82.4, "role": 80.8, "offense": 84.1, "scheme": 78.6, "schedule": 66.0, "playoffs": 82.8, "durability": 82}, {"name": "Travis Etienne Jr.", "pos": "RB", "team": "NO", "adp": 35, "quality": 84, "risk": 21, "passRole": 0.62, "note": "Versatile back with receiving value and useful weekly floor.", "production": 80.3, "history": 88.4, "role": 89.3, "offense": 86.2, "scheme": 79.8, "schedule": 69.9, "playoffs": 70.4, "durability": 79}, {"name": "Zay Flowers", "pos": "WR", "team": "BAL", "adp": 36, "quality": 84, "risk": 14, "passRole": 1.0, "note": "Dynamic separator with volume and explosive-play upside.", "production": 83.3, "history": 83.2, "role": 79.2, "offense": 75.5, "scheme": 77.1, "schedule": 61.0, "playoffs": 82.4, "durability": 86}, {"name": "Emeka Egbuka", "pos": "WR", "team": "TB", "adp": 37, "quality": 84, "risk": 17, "passRole": 1.0, "note": "Ascending young receiver with polished route profile.", "production": 87.7, "history": 76.5, "role": 89.5, "offense": 85.0, "scheme": 79.5, "schedule": 62.1, "playoffs": 61.8, "durability": 83}, {"name": "Quinshon Judkins", "pos": "RB", "team": "CLE", "adp": 38, "quality": 83, "risk": 21, "passRole": 0.42, "note": "Power-volume profile with red-zone upside.", "production": 79.9, "history": 83.1, "role": 78.5, "offense": 81.1, "scheme": 79.0, "schedule": 69.6, "playoffs": 71.6, "durability": 79}, {"name": "Ladd McConkey", "pos": "WR", "team": "LAC", "adp": 39, "quality": 84, "risk": 16, "passRole": 1.0, "note": "Efficient route winner with high reception floor.", "production": 82.8, "history": 80.5, "role": 87.1, "offense": 74.0, "scheme": 75.3, "schedule": 73.9, "playoffs": 67.6, "durability": 84}, {"name": "Tee Higgins", "pos": "WR", "team": "CIN", "adp": 40, "quality": 83, "risk": 22, "passRole": 1.0, "note": "High touchdown ceiling with some durability volatility.", "production": 83.8, "history": 84.0, "role": 79.2, "offense": 84.9, "scheme": 84.1, "schedule": 78.1, "playoffs": 81.1, "durability": 78}, {"name": "Colston Loveland", "pos": "TE", "team": "CHI", "adp": 41, "quality": 83, "risk": 17, "passRole": 1.0, "note": "Young receiving tight end with positional breakout upside.", "production": 81.9, "history": 76.0, "role": 82.0, "offense": 78.3, "scheme": 80.3, "schedule": 81.4, "playoffs": 71.2, "durability": 83}, {"name": "Lamar Jackson", "pos": "QB", "team": "BAL", "adp": 42, "quality": 90, "risk": 15, "passRole": 0.0, "note": "Elite rushing floor and week-winning quarterback ceiling.", "production": 91.4, "history": 91.1, "role": 91.4, "offense": 81.5, "scheme": 83.1, "schedule": 74.0, "playoffs": 63.1, "durability": 85}, {"name": "Davante Adams", "pos": "WR", "team": "LAR", "adp": 43, "quality": 82, "risk": 23, "passRole": 1.0, "note": "Veteran red-zone technician with strong target ceiling.", "production": 79.4, "history": 86.3, "role": 77.5, "offense": 85.9, "scheme": 83.7, "schedule": 83.1, "playoffs": 64.4, "durability": 77}, {"name": "Cam Skattebo", "pos": "RB", "team": "NYG", "adp": 44, "quality": 82, "risk": 18, "passRole": 0.48, "note": "Physical volume back with useful receiving contribution.", "production": 82.2, "history": 79.7, "role": 86.9, "offense": 81.1, "scheme": 80.2, "schedule": 74.3, "playoffs": 76.4, "durability": 82}, {"name": "D'Andre Swift", "pos": "RB", "team": "CHI", "adp": 45, "quality": 81, "risk": 20, "passRole": 0.72, "note": "Versatile back whose receiving work raises PPR floor.", "production": 80.4, "history": 84.6, "role": 87.0, "offense": 76.3, "scheme": 78.3, "schedule": 70.7, "playoffs": 66.3, "durability": 80}, {"name": "Bhayshul Tuten", "pos": "RB", "team": "JAC", "adp": 46, "quality": 81, "risk": 22, "passRole": 0.42, "note": "Explosive young back with breakout upside.", "production": 82.4, "history": 72.7, "role": 80.9, "offense": 76.3, "scheme": 79.0, "schedule": 67.2, "playoffs": 78.7, "durability": 78}, {"name": "Jaylen Waddle", "pos": "WR", "team": "DEN", "adp": 47, "quality": 81, "risk": 21, "passRole": 1.0, "note": "Speed receiver with high-efficiency ceiling.", "production": 84.6, "history": 80.3, "role": 76.9, "offense": 80.6, "scheme": 81.6, "schedule": 66.0, "playoffs": 67.1, "durability": 79}, {"name": "Bucky Irving", "pos": "RB", "team": "TB", "adp": 48, "quality": 81, "risk": 19, "passRole": 0.76, "note": "Efficient dual-threat back with strong PPR fit.", "production": 84.9, "history": 77.0, "role": 80.5, "offense": 82.0, "scheme": 76.5, "schedule": 81.2, "playoffs": 72.0, "durability": 81}, {"name": "Terry McLaurin", "pos": "WR", "team": "WAS", "adp": 49, "quality": 80, "risk": 18, "passRole": 1.0, "note": "Proven downfield receiver with stable role.", "production": 76.9, "history": 80.1, "role": 81.3, "offense": 74.1, "scheme": 78.8, "schedule": 62.2, "playoffs": 61.1, "durability": 82}, {"name": "DJ Moore", "pos": "WR", "team": "BUF", "adp": 50, "quality": 80, "risk": 18, "passRole": 1.0, "note": "YAC-heavy receiver with proven volume history.", "production": 78.4, "history": 79.8, "role": 75.9, "offense": 73.8, "scheme": 81.3, "schedule": 77.5, "playoffs": 70.4, "durability": 82}, {"name": "Tyler Warren", "pos": "TE", "team": "IND", "adp": 51, "quality": 81, "risk": 16, "passRole": 1.0, "note": "High-upside receiving tight end with mismatch ability.", "production": 84.0, "history": 77.6, "role": 79.0, "offense": 76.2, "scheme": 74.2, "schedule": 75.1, "playoffs": 75.4, "durability": 84}, {"name": "Jameson Williams", "pos": "WR", "team": "DET", "adp": 52, "quality": 79, "risk": 23, "passRole": 1.0, "note": "Explosive ceiling; target consistency is the swing factor.", "production": 79.9, "history": 78.9, "role": 80.9, "offense": 75.7, "scheme": 70.2, "schedule": 80.2, "playoffs": 71.1, "durability": 77}, {"name": "Rome Odunze", "pos": "WR", "team": "CHI", "adp": 53, "quality": 79, "risk": 18, "passRole": 1.0, "note": "Young receiver with breakout profile and red-zone upside.", "production": 78.8, "history": 69.3, "role": 74.1, "offense": 74.3, "scheme": 76.3, "schedule": 77.4, "playoffs": 71.4, "durability": 82}, {"name": "Jalen Hurts", "pos": "QB", "team": "PHI", "adp": 54, "quality": 88, "risk": 15, "passRole": 0.0, "note": "Rushing touchdowns create elite fantasy leverage.", "production": 86.4, "history": 87.7, "role": 89.2, "offense": 85.7, "scheme": 86.2, "schedule": 65.1, "playoffs": 74.2, "durability": 85}, {"name": "Jayden Daniels", "pos": "QB", "team": "WAS", "adp": 55, "quality": 88, "risk": 18, "passRole": 0.0, "note": "Dynamic rushing quarterback with explosive passing upside.", "production": 88.1, "history": 88.4, "role": 86.1, "offense": 82.1, "scheme": 86.8, "schedule": 67.8, "playoffs": 63.5, "durability": 82}, {"name": "Joe Burrow", "pos": "QB", "team": "CIN", "adp": 56, "quality": 87, "risk": 20, "passRole": 0.0, "note": "Elite passer in a concentrated high-end receiving offense.", "production": 86.4, "history": 89.9, "role": 85.4, "offense": 88.9, "scheme": 88.1, "schedule": 66.6, "playoffs": 70.4, "durability": 80}, {"name": "Drake Maye", "pos": "QB", "team": "NE", "adp": 57, "quality": 86, "risk": 17, "passRole": 0.0, "note": "Rushing and downfield passing create top-tier ceiling.", "production": 86.9, "history": 81.3, "role": 87.2, "offense": 83.5, "scheme": 85.2, "schedule": 83.0, "playoffs": 75.7, "durability": 83}, {"name": "Josh Jacobs", "pos": "RB", "team": "GB", "adp": 58, "quality": 79, "risk": 20, "passRole": 0.45, "note": "Veteran volume back with touchdown utility.", "production": 75.7, "history": 78.9, "role": 81.8, "offense": 82.0, "scheme": 72.1, "schedule": 62.0, "playoffs": 74.9, "durability": 80}, {"name": "Matthew Golden", "pos": "WR", "team": "GB", "adp": 59, "quality": 78, "risk": 20, "passRole": 1.0, "note": "Young explosive receiver with ascending target opportunity.", "production": 81.4, "history": 76.8, "role": 75.7, "offense": 81.0, "scheme": 71.1, "schedule": 81.3, "playoffs": 61.9, "durability": 80}, {"name": "Jordan Addison", "pos": "WR", "team": "MIN", "adp": 60, "quality": 78, "risk": 22, "passRole": 1.0, "note": "Strong scoring efficiency and route-running ceiling.", "production": 80.7, "history": 80.5, "role": 80.4, "offense": 68.2, "scheme": 71.3, "schedule": 64.9, "playoffs": 69.0, "durability": 78}, {"name": "Josh Downs", "pos": "WR", "team": "IND", "adp": 61, "quality": 78, "risk": 16, "passRole": 1.0, "note": "High-percentage target profile with PPR usefulness.", "production": 74.8, "history": 73.3, "role": 77.4, "offense": 73.2, "scheme": 71.2, "schedule": 74.7, "playoffs": 77.5, "durability": 84}, {"name": "Travis Kelce", "pos": "TE", "team": "KC", "adp": 62, "quality": 78, "risk": 26, "passRole": 1.0, "note": "Still carries strong weekly role, though age lowers long-range certainty.", "production": 75.9, "history": 81.5, "role": 78.2, "offense": 72.2, "scheme": 77.2, "schedule": 60.5, "playoffs": 83.5, "durability": 74}, {"name": "Tucker Kraft", "pos": "TE", "team": "GB", "adp": 63, "quality": 77, "risk": 18, "passRole": 1.0, "note": "Athletic receiving tight end with touchdown upside.", "production": 73.1, "history": 80.1, "role": 75.3, "offense": 80.0, "scheme": 70.1, "schedule": 72.6, "playoffs": 73.3, "durability": 82}, {"name": "Patrick Mahomes", "pos": "QB", "team": "KC", "adp": 64, "quality": 85, "risk": 11, "passRole": 0.0, "note": "Elite real-life passer with strong weekly stability.", "production": 83.3, "history": 89.8, "role": 80.5, "offense": 79.2, "scheme": 84.2, "schedule": 60.9, "playoffs": 61.2, "durability": 89}, {"name": "Justin Herbert", "pos": "QB", "team": "LAC", "adp": 65, "quality": 84, "risk": 13, "passRole": 0.0, "note": "High-level passer with volume-driven upside.", "production": 82.7, "history": 88.2, "role": 84.9, "offense": 74.0, "scheme": 75.3, "schedule": 76.3, "playoffs": 78.0, "durability": 87}, {"name": "Bo Nix", "pos": "QB", "team": "DEN", "adp": 66, "quality": 83, "risk": 14, "passRole": 0.0, "note": "Rushing contribution plus efficient structure raises floor.", "production": 85.2, "history": 86.9, "role": 88.6, "offense": 82.6, "scheme": 83.6, "schedule": 77.4, "playoffs": 71.2, "durability": 86}, {"name": "Caleb Williams", "pos": "QB", "team": "CHI", "adp": 67, "quality": 83, "risk": 17, "passRole": 0.0, "note": "High-upside passer with mobility and improving supporting cast.", "production": 82.2, "history": 85.3, "role": 77.5, "offense": 78.3, "scheme": 80.3, "schedule": 67.5, "playoffs": 65.4, "durability": 83}, {"name": "Trevor Lawrence", "pos": "QB", "team": "JAC", "adp": 68, "quality": 82, "risk": 16, "passRole": 0.0, "note": "Volume and mobility keep ceiling intact.", "production": 85.8, "history": 77.6, "role": 81.0, "offense": 77.3, "scheme": 80.0, "schedule": 73.7, "playoffs": 70.6, "durability": 84}, {"name": "Brock Purdy", "pos": "QB", "team": "SF", "adp": 69, "quality": 81, "risk": 17, "passRole": 0.0, "note": "Efficient passer in a scheme designed to create yards after catch.", "production": 78.5, "history": 81.9, "role": 77.6, "offense": 75.9, "scheme": 76.1, "schedule": 69.5, "playoffs": 68.5, "durability": 83}, {"name": "Khalil Shakir", "pos": "WR", "team": "BUF", "adp": 70, "quality": 77, "risk": 14, "passRole": 1.0, "note": "Reliable underneath target with strong catch-rate profile.", "production": 78.8, "history": 74.9, "role": 72.5, "offense": 70.8, "scheme": 78.3, "schedule": 63.5, "playoffs": 65.1, "durability": 86}, {"name": "Xavier Worthy", "pos": "WR", "team": "KC", "adp": 71, "quality": 77, "risk": 24, "passRole": 1.0, "note": "Explosive speed creates big weekly ceiling.", "production": 76.0, "history": 77.8, "role": 74.5, "offense": 71.2, "scheme": 76.2, "schedule": 80.6, "playoffs": 65.8, "durability": 76}, {"name": "Chris Godwin Jr.", "pos": "WR", "team": "TB", "adp": 72, "quality": 76, "risk": 28, "passRole": 1.0, "note": "High-volume slot profile when healthy.", "production": 72.1, "history": 79.2, "role": 73.7, "offense": 77.0, "scheme": 71.5, "schedule": 81.6, "playoffs": 62.1, "durability": 72}, {"name": "Jake Ferguson", "pos": "TE", "team": "DAL", "adp": 73, "quality": 76, "risk": 15, "passRole": 1.0, "note": "Steady route volume and red-zone utility.", "production": 77.7, "history": 79.5, "role": 70.1, "offense": 77.3, "scheme": 70.9, "schedule": 79.2, "playoffs": 79.8, "durability": 85}, {"name": "Dallas Goedert", "pos": "TE", "team": "PHI", "adp": 74, "quality": 75, "risk": 20, "passRole": 1.0, "note": "Efficient veteran receiving tight end.", "production": 72.2, "history": 77.6, "role": 78.2, "offense": 72.7, "scheme": 73.2, "schedule": 67.2, "playoffs": 72.7, "durability": 80}, {"name": "Rico Dowdle", "pos": "RB", "team": "PIT", "adp": 75, "quality": 75, "risk": 21, "passRole": 0.44, "note": "Useful rushing volume with touchdown upside.", "production": 73.5, "history": 79.8, "role": 79.0, "offense": 77.2, "scheme": 70.4, "schedule": 82.2, "playoffs": 77.5, "durability": 79}, {"name": "Chuba Hubbard", "pos": "RB", "team": "CAR", "adp": 76, "quality": 75, "risk": 20, "passRole": 0.52, "note": "Stable volume profile with three-down utility.", "production": 71.1, "history": 71.6, "role": 78.1, "offense": 74.1, "scheme": 68.6, "schedule": 62.2, "playoffs": 81.6, "durability": 80}, {"name": "Aaron Jones Sr.", "pos": "RB", "team": "MIN", "adp": 77, "quality": 74, "risk": 27, "passRole": 0.75, "note": "Veteran receiving ability keeps PPR value alive.", "production": 77.3, "history": 73.4, "role": 71.5, "offense": 64.2, "scheme": 67.3, "schedule": 61.0, "playoffs": 80.2, "durability": 73}, {"name": "Rachaad White", "pos": "RB", "team": "WAS", "adp": 78, "quality": 74, "risk": 18, "passRole": 0.82, "note": "Receiving usage supplies a useful weekly floor.", "production": 77.0, "history": 78.4, "role": 68.0, "offense": 68.1, "scheme": 72.8, "schedule": 78.5, "playoffs": 79.0, "durability": 82}, {"name": "J.K. Dobbins", "pos": "RB", "team": "DEN", "adp": 79, "quality": 73, "risk": 34, "passRole": 0.35, "note": "Efficient runner but durability materially raises risk.", "production": 70.0, "history": 70.0, "role": 72.1, "offense": 72.6, "scheme": 73.6, "schedule": 68.6, "playoffs": 66.5, "durability": 66}, {"name": "Kyle Monangai", "pos": "RB", "team": "CHI", "adp": 80, "quality": 73, "risk": 19, "passRole": 0.38, "note": "Young runner with role-growth upside.", "production": 73.8, "history": 69.2, "role": 73.8, "offense": 68.3, "scheme": 70.3, "schedule": 74.2, "playoffs": 64.3, "durability": 81}, {"name": "RJ Harvey", "pos": "RB", "team": "DEN", "adp": 81, "quality": 73, "risk": 20, "passRole": 0.52, "note": "Explosive skill set with contingent upside.", "production": 76.2, "history": 68.8, "role": 75.3, "offense": 72.6, "scheme": 73.6, "schedule": 62.7, "playoffs": 71.7, "durability": 80}, {"name": "Blake Corum", "pos": "RB", "team": "LAR", "adp": 82, "quality": 72, "risk": 18, "passRole": 0.32, "note": "High-value backup with standalone and injury-away upside.", "production": 73.3, "history": 72.2, "role": 66.6, "offense": 75.9, "scheme": 73.7, "schedule": 63.0, "playoffs": 71.0, "durability": 82}, {"name": "Jacory Croskey-Merritt", "pos": "RB", "team": "WAS", "adp": 83, "quality": 72, "risk": 20, "passRole": 0.45, "note": "Emerging workload candidate with upside.", "production": 71.5, "history": 70.8, "role": 66.6, "offense": 66.1, "scheme": 70.8, "schedule": 60.9, "playoffs": 65.3, "durability": 80}, {"name": "Tyjae Spears", "pos": "RB", "team": "TEN", "adp": 84, "quality": 72, "risk": 22, "passRole": 0.78, "note": "Receiving skill gives flex value in PPR formats.", "production": 73.1, "history": 72.2, "role": 72.7, "offense": 69.1, "scheme": 71.3, "schedule": 72.0, "playoffs": 76.9, "durability": 78}, {"name": "Jordan Mason", "pos": "RB", "team": "MIN", "adp": 85, "quality": 71, "risk": 19, "passRole": 0.28, "note": "Power runner with valuable contingent workload.", "production": 71.0, "history": 71.7, "role": 72.2, "offense": 61.2, "scheme": 64.3, "schedule": 67.4, "playoffs": 62.3, "durability": 81}, {"name": "Woody Marks", "pos": "RB", "team": "HOU", "adp": 86, "quality": 71, "risk": 18, "passRole": 0.7, "note": "Receiving-friendly profile with late-round upside.", "production": 74.6, "history": 75.3, "role": 67.4, "offense": 68.4, "scheme": 61.0, "schedule": 70.0, "playoffs": 62.9, "durability": 82}, {"name": "Quentin Johnston", "pos": "WR", "team": "LAC", "adp": 87, "quality": 72, "risk": 23, "passRole": 1.0, "note": "Size-speed ceiling with week-to-week volatility.", "production": 74.4, "history": 75.6, "role": 73.2, "offense": 62.0, "scheme": 63.3, "schedule": 82.0, "playoffs": 61.7, "durability": 77}, {"name": "Jayden Reed", "pos": "WR", "team": "GB", "adp": 88, "quality": 72, "risk": 20, "passRole": 1.0, "note": "Versatile playmaker whose usage can create spike weeks.", "production": 74.2, "history": 68.4, "role": 66.3, "offense": 75.0, "scheme": 65.1, "schedule": 76.4, "playoffs": 82.4, "durability": 80}, {"name": "Romeo Doubs", "pos": "WR", "team": "NE", "adp": 89, "quality": 71, "risk": 18, "passRole": 1.0, "note": "Steady outside receiver with touchdown utility.", "production": 74.2, "history": 66.1, "role": 71.7, "offense": 68.5, "scheme": 70.2, "schedule": 80.0, "playoffs": 76.6, "durability": 82}, {"name": "Jalen Coker", "pos": "WR", "team": "CAR", "adp": 90, "quality": 71, "risk": 17, "passRole": 1.0, "note": "Ascending receiver with route-winning upside.", "production": 72.5, "history": 70.1, "role": 73.9, "offense": 70.1, "scheme": 64.6, "schedule": 76.8, "playoffs": 68.0, "durability": 83}, {"name": "Deebo Samuel Sr.", "pos": "WR", "team": "SF", "adp": 91, "quality": 70, "risk": 25, "passRole": 1.0, "note": "Versatile veteran with manufactured-touch ceiling.", "production": 67.4, "history": 74.5, "role": 73.6, "offense": 64.9, "scheme": 65.1, "schedule": 67.9, "playoffs": 73.6, "durability": 75}, {"name": "Alec Pierce", "pos": "WR", "team": "IND", "adp": 92, "quality": 70, "risk": 22, "passRole": 1.0, "note": "Downfield role creates big-play volatility.", "production": 70.5, "history": 72.1, "role": 69.1, "offense": 65.2, "scheme": 63.2, "schedule": 62.8, "playoffs": 76.0, "durability": 78}, {"name": "Michael Wilson", "pos": "WR", "team": "ARI", "adp": 93, "quality": 70, "risk": 18, "passRole": 1.0, "note": "Size and role can support red-zone value.", "production": 66.3, "history": 68.8, "role": 69.3, "offense": 73.5, "scheme": 67.4, "schedule": 74.2, "playoffs": 64.6, "durability": 82}, {"name": "Stefon Diggs", "pos": "WR", "team": "WAS", "adp": 94, "quality": 70, "risk": 27, "passRole": 1.0, "note": "Veteran target skills with age-related uncertainty.", "production": 72.1, "history": 70.0, "role": 68.6, "offense": 64.1, "scheme": 68.8, "schedule": 65.5, "playoffs": 76.6, "durability": 73}, {"name": "Wan'Dale Robinson", "pos": "WR", "team": "TEN", "adp": 95, "quality": 69, "risk": 15, "passRole": 1.0, "note": "Short-area target profile can help in PPR.", "production": 66.3, "history": 67.6, "role": 67.7, "offense": 66.1, "scheme": 68.3, "schedule": 81.8, "playoffs": 75.9, "durability": 85}, {"name": "Brian Thomas Jr.", "pos": "WR", "team": "JAC", "adp": 96, "quality": 69, "risk": 25, "passRole": 1.0, "note": "Explosive perimeter talent with rebound upside.", "production": 65.6, "history": 70.7, "role": 65.0, "offense": 64.3, "scheme": 67.0, "schedule": 74.2, "playoffs": 80.0, "durability": 75}, {"name": "Isaiah Likely", "pos": "TE", "team": "NYG", "adp": 97, "quality": 70, "risk": 19, "passRole": 1.0, "note": "Athletic tight end with breakout traits.", "production": 71.6, "history": 71.3, "role": 70.5, "offense": 69.1, "scheme": 68.2, "schedule": 74.2, "playoffs": 77.0, "durability": 81}, {"name": "Dalton Kincaid", "pos": "TE", "team": "BUF", "adp": 98, "quality": 70, "risk": 21, "passRole": 1.0, "note": "Receiving-first profile with target-growth upside.", "production": 66.4, "history": 66.1, "role": 65.7, "offense": 63.8, "scheme": 71.3, "schedule": 61.6, "playoffs": 66.8, "durability": 79}, {"name": "Mark Andrews", "pos": "TE", "team": "BAL", "adp": 99, "quality": 69, "risk": 23, "passRole": 1.0, "note": "Veteran red-zone weapon with proven ceiling.", "production": 71.1, "history": 72.2, "role": 66.0, "offense": 60.5, "scheme": 62.1, "schedule": 83.1, "playoffs": 66.4, "durability": 77}, {"name": "Brenton Strange", "pos": "TE", "team": "JAC", "adp": 100, "quality": 68, "risk": 17, "passRole": 1.0, "note": "Athletic role-based sleeper at a thin position.", "production": 65.9, "history": 66.5, "role": 68.4, "offense": 63.3, "scheme": 66.0, "schedule": 83.4, "playoffs": 71.3, "durability": 83}, {"name": "Dalton Schultz", "pos": "TE", "team": "HOU", "adp": 101, "quality": 67, "risk": 14, "passRole": 1.0, "note": "Stable veteran route participation and floor.", "production": 65.3, "history": 64.5, "role": 68.3, "offense": 64.4, "scheme": 57.0, "schedule": 81.9, "playoffs": 69.0, "durability": 86}, {"name": "Pat Freiermuth", "pos": "TE", "team": "PIT", "adp": 102, "quality": 67, "risk": 16, "passRole": 1.0, "note": "Red-zone and short-area role offers touchdown value.", "production": 63.2, "history": 69.4, "role": 70.7, "offense": 69.2, "scheme": 62.4, "schedule": 69.3, "playoffs": 81.8, "durability": 84}, {"name": "Matthew Stafford", "pos": "QB", "team": "LAR", "adp": 103, "quality": 79, "risk": 22, "passRole": 0.0, "note": "Veteran passer with strong supporting weapons.", "production": 76.8, "history": 82.2, "role": 76.6, "offense": 82.9, "scheme": 80.7, "schedule": 72.4, "playoffs": 83.6, "durability": 78}, {"name": "Kyler Murray", "pos": "QB", "team": "MIN", "adp": 104, "quality": 79, "risk": 21, "passRole": 0.0, "note": "Mobility preserves fantasy ceiling.", "production": 82.9, "history": 76.7, "role": 78.2, "offense": 69.2, "scheme": 72.3, "schedule": 65.2, "playoffs": 65.8, "durability": 79}, {"name": "Jared Goff", "pos": "QB", "team": "DET", "adp": 105, "quality": 78, "risk": 12, "passRole": 0.0, "note": "Efficient pocket passer in a strong offense.", "production": 75.8, "history": 73.6, "role": 79.7, "offense": 74.7, "scheme": 69.2, "schedule": 72.2, "playoffs": 64.0, "durability": 88}, {"name": "C.J. Stroud", "pos": "QB", "team": "HOU", "adp": 106, "quality": 78, "risk": 15, "passRole": 0.0, "note": "Talented passer with rebound potential.", "production": 77.5, "history": 77.5, "role": 79.4, "offense": 75.4, "scheme": 68.0, "schedule": 68.2, "playoffs": 70.3, "durability": 85}, {"name": "Tyler Shough", "pos": "QB", "team": "NO", "adp": 107, "quality": 72, "risk": 25, "passRole": 0.0, "note": "Young quarterback with late-round upside.", "production": 73.2, "history": 64.1, "role": 75.0, "offense": 74.2, "scheme": 67.8, "schedule": 68.9, "playoffs": 65.6, "durability": 75}, {"name": "Sam Darnold", "pos": "QB", "team": "SEA", "adp": 108, "quality": 71, "risk": 19, "passRole": 0.0, "note": "Veteran starter with streaming utility.", "production": 73.8, "history": 68.6, "role": 66.6, "offense": 69.2, "scheme": 73.6, "schedule": 67.2, "playoffs": 68.4, "durability": 81}, {"name": "Steelers D/ST", "pos": "DST", "team": "PIT", "adp": 140, "quality": 67, "risk": 18, "passRole": 0.0, "note": "Pressure-driven unit with weekly sack upside.", "production": 68.3, "history": 67.8, "role": 69.4, "offense": 69.2, "scheme": 62.4, "schedule": 72.3, "playoffs": 61.8, "durability": 82}, {"name": "Seahawks D/ST", "pos": "DST", "team": "SEA", "adp": 141, "quality": 66, "risk": 18, "passRole": 0.0, "note": "Useful unit for matchup-based streaming.", "production": 64.4, "history": 68.8, "role": 63.3, "offense": 64.2, "scheme": 68.6, "schedule": 83.1, "playoffs": 75.6, "durability": 82}, {"name": "Rams D/ST", "pos": "DST", "team": "LAR", "adp": 142, "quality": 66, "risk": 20, "passRole": 0.0, "note": "Pass-rush upside can create turnover weeks.", "production": 68.4, "history": 70.6, "role": 67.9, "offense": 69.9, "scheme": 67.7, "schedule": 75.4, "playoffs": 71.2, "durability": 80}, {"name": "Ravens D/ST", "pos": "DST", "team": "BAL", "adp": 143, "quality": 66, "risk": 17, "passRole": 0.0, "note": "High-end talent with splash-play potential.", "production": 68.8, "history": 69.4, "role": 68.3, "offense": 57.5, "scheme": 59.1, "schedule": 61.8, "playoffs": 65.4, "durability": 83}, {"name": "Eagles D/ST", "pos": "DST", "team": "PHI", "adp": 144, "quality": 65, "risk": 17, "passRole": 0.0, "note": "Deep defensive roster with pressure upside.", "production": 64.9, "history": 61.1, "role": 61.7, "offense": 62.7, "scheme": 63.2, "schedule": 74.3, "playoffs": 78.8, "durability": 83}, {"name": "Browns D/ST", "pos": "DST", "team": "CLE", "adp": 145, "quality": 65, "risk": 20, "passRole": 0.0, "note": "Edge pressure creates sack-driven ceiling.", "production": 68.7, "history": 62.4, "role": 62.0, "offense": 63.1, "scheme": 61.0, "schedule": 73.7, "playoffs": 73.7, "durability": 80}, {"name": "Patriots D/ST", "pos": "DST", "team": "NE", "adp": 146, "quality": 64, "risk": 17, "passRole": 0.0, "note": "Scheme flexibility supports matchup value.", "production": 63.2, "history": 60.1, "role": 66.7, "offense": 61.5, "scheme": 63.2, "schedule": 69.6, "playoffs": 69.3, "durability": 83}, {"name": "Lions D/ST", "pos": "DST", "team": "DET", "adp": 147, "quality": 64, "risk": 18, "passRole": 0.0, "note": "Aggressive unit with turnover upside.", "production": 63.2, "history": 69.0, "role": 64.1, "offense": 60.7, "scheme": 55.2, "schedule": 68.9, "playoffs": 76.8, "durability": 82}, {"name": "Chiefs D/ST", "pos": "DST", "team": "KC", "adp": 148, "quality": 64, "risk": 17, "passRole": 0.0, "note": "Well-coached unit with situational value.", "production": 66.1, "history": 62.4, "role": 64.2, "offense": 58.2, "scheme": 63.2, "schedule": 67.6, "playoffs": 68.8, "durability": 83}, {"name": "Chargers D/ST", "pos": "DST", "team": "LAC", "adp": 149, "quality": 63, "risk": 18, "passRole": 0.0, "note": "Useful streamer in favorable matchups.", "production": 61.4, "history": 58.9, "role": 66.5, "offense": 53.0, "scheme": 54.3, "schedule": 79.4, "playoffs": 66.5, "durability": 82}, {"name": "Brandon Aubrey", "pos": "K", "team": "DAL", "adp": 150, "quality": 66, "risk": 10, "passRole": 0.0, "note": "Elite range and stable kicking environment.", "production": 63.2, "history": 61.2, "role": 70.4, "offense": 67.3, "scheme": 60.9, "schedule": 82.7, "playoffs": 67.6, "durability": 90}, {"name": "Cameron Dicker", "pos": "K", "team": "LAC", "adp": 151, "quality": 64, "risk": 11, "passRole": 0.0, "note": "Accurate kicker with solid scoring environment.", "production": 62.7, "history": 68.4, "role": 60.4, "offense": 54.0, "scheme": 55.3, "schedule": 76.9, "playoffs": 78.9, "durability": 89}, {"name": "Jason Myers", "pos": "K", "team": "SEA", "adp": 152, "quality": 63, "risk": 12, "passRole": 0.0, "note": "Veteran kicker with dependable role.", "production": 59.4, "history": 59.9, "role": 62.9, "offense": 61.2, "scheme": 65.6, "schedule": 79.5, "playoffs": 80.6, "durability": 88}, {"name": "Harrison Butker", "pos": "K", "team": "KC", "adp": 153, "quality": 63, "risk": 12, "passRole": 0.0, "note": "Strong offense creates regular scoring chances.", "production": 65.6, "history": 65.7, "role": 62.6, "offense": 57.2, "scheme": 62.2, "schedule": 82.4, "playoffs": 69.9, "durability": 88}, {"name": "Cam Little", "pos": "K", "team": "JAC", "adp": 154, "quality": 62, "risk": 13, "passRole": 0.0, "note": "Useful leg strength and opportunity.", "production": 62.6, "history": 63.6, "role": 65.0, "offense": 57.3, "scheme": 60.0, "schedule": 80.2, "playoffs": 82.1, "durability": 87}, {"name": "Jake Bates", "pos": "K", "team": "DET", "adp": 155, "quality": 62, "risk": 13, "passRole": 0.0, "note": "High-scoring offense creates extra-point volume.", "production": 59.2, "history": 64.8, "role": 65.8, "offense": 58.7, "scheme": 53.2, "schedule": 73.5, "playoffs": 62.2, "durability": 87}];
+const DEFAULT_WEIGHTS={production:25,history:15,role:15,offense:10,scheme:10,schedule:10,playoffs:5,scarcity:5,durability:5};
+const LABELS={production:"Projected production",history:"History / consistency",role:"Role / volume",offense:"Offensive environment",scheme:"Coaching / scheme",schedule:"Schedule / matchup",playoffs:"Weeks 15–17",scarcity:"Positional scarcity",durability:"Durability / risk"};
+
+function freshState(){
+  return {
+    players:JSON.parse(JSON.stringify(STARTER_PLAYERS)),
+    actions:[],
+    config:{teams:10,slot:6,scoring:"ppr",roster:{QB:1,RB:2,WR:2,TE:1,FLEX:1,DST:1,K:1,BENCH:7}},
+    teamNames:Array.from({length:10},(_,i)=>`Team ${i+1}`),
+    weights:{...DEFAULT_WEIGHTS},
+    filter:"ALL"
+  }
+}
+let state=loadState()||freshState();
+normalizeState();
+
+function loadState(){try{return JSON.parse(localStorage.getItem("novaDraftRoom2026v2"))}catch(e){return null}}
+function save(){localStorage.setItem("novaDraftRoom2026v2",JSON.stringify(state))}
+function normalizeState(){
+  if(!state.teamNames)state.teamNames=Array.from({length:state.config.teams},(_,i)=>`Team ${i+1}`);
+  while(state.teamNames.length<state.config.teams)state.teamNames.push(`Team ${state.teamNames.length+1}`);
+  state.players.forEach((p,i)=>{if(!p.id)p.id="p"+i+"_"+p.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")});
+}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+function roundOf(n){return Math.floor((n-1)/state.config.teams)+1}
+function rawSlot(n){return ((n-1)%state.config.teams)+1}
+function managerSlotAt(n){const r=roundOf(n),x=rawSlot(n);return r%2===1?x:state.config.teams-x+1}
+function pickLabel(n){return `${roundOf(n)}.${String(rawSlot(n)).padStart(2,"0")}`}
+function currentPick(){return state.actions.length+1}
+function currentManager(){return managerSlotAt(currentPick())}
+function nextPickForSlot(slot,from){for(let n=Math.max(1,from);n<999;n++)if(managerSlotAt(n)===slot)return n;return null}
+function herNextPick(from=currentPick()){return nextPickForSlot(state.config.slot,from)}
+function goneSet(actions=state.actions){return new Set(actions.filter(a=>a.playerId).map(a=>a.playerId))}
+function rosterFor(slot,actions=state.actions){return actions.filter(a=>a.manager===slot&&a.playerId).map(a=>state.players.find(p=>p.id===a.playerId)).filter(Boolean)}
+function countsFor(slot,actions=state.actions){const c={QB:0,RB:0,WR:0,TE:0,DST:0,K:0};rosterFor(slot,actions).forEach(p=>c[p.pos]=(c[p.pos]||0)+1);return c}
+function available(actions=state.actions){const gone=goneSet(actions);return state.players.filter(p=>!gone.has(p.id))}
+function totalRosterSlots(){const r=state.config.roster;return (r.QB||0)+(r.RB||0)+(r.WR||0)+(r.TE||0)+(r.FLEX||0)+(r.DST||0)+(r.K||0)+(r.BENCH||0)}
+
+function starterNeedFor(slot,pos,actions=state.actions){
+  const c=countsFor(slot,actions),r=state.config.roster;
+  if(["RB","WR","TE"].includes(pos)){
+    const base=Math.max(0,(r[pos]||0)-c[pos]);
+    const flexOver=Math.max(0,c.RB-(r.RB||0))+Math.max(0,c.WR-(r.WR||0))+Math.max(0,c.TE-(r.TE||0));
+    const flexNeed=Math.max(0,(r.FLEX||0)-flexOver);
+    return base+flexNeed*(pos==="TE"?0.18:0.42);
+  }
+  return Math.max(0,(r[pos]||0)-(c[pos]||0));
+}
+function benchCount(slot,actions=state.actions){
+  const roster=rosterFor(slot,actions),r=state.config.roster,c=countsFor(slot,actions);
+  let starterFilled=Math.min(c.QB,r.QB)+Math.min(c.RB,r.RB)+Math.min(c.WR,r.WR)+Math.min(c.TE,r.TE)+Math.min(c.DST,r.DST)+Math.min(c.K,r.K);
+  const flexEligible=Math.max(0,c.RB-r.RB)+Math.max(0,c.WR-r.WR)+Math.max(0,c.TE-r.TE);
+  starterFilled+=Math.min(r.FLEX,flexEligible);
+  return Math.max(0,roster.length-starterFilled);
+}
+function scoringAdj(p){
+  if(state.config.scoring==="ppr"){if(p.pos==="WR")return 2.1;if(p.pos==="TE")return 1.6;if(p.pos==="RB")return (p.passRole-.5)*5}
+  if(state.config.scoring==="half"){if(p.pos==="WR")return 1;if(p.pos==="TE")return .7;if(p.pos==="RB")return (p.passRole-.5)*2.5}
+  if(state.config.scoring==="standard"){if(p.pos==="RB")return (0.55-p.passRole)*4+1.4;if(p.pos==="WR")return -1}
+  return 0
+}
+function baseWeighted(p){
+  const w=state.weights,keys=["production","history","role","offense","scheme","schedule","playoffs","durability"];let num=0,den=0;
+  keys.forEach(k=>{num+=(p[k]??70)*(w[k]||0);den+=(w[k]||0)});return den?num/den:70
+}
+function scarcityRaw(p,actions=state.actions){
+  const list=available(actions).filter(x=>x.pos===p.pos).sort((a,b)=>baseWeighted(b)-baseWeighted(a));
+  const idx=list.findIndex(x=>x.id===p.id);if(idx<0)return 45;
+  const later=list[Math.min(list.length-1,idx+Math.max(4,Math.round(state.config.teams*.6)))];
+  return clamp(50+(baseWeighted(p)-baseWeighted(later))*4,35,96)
+}
+function playerScoreForManager(p,slot,actions=state.actions,forPrediction=false){
+  const w=state.weights,sc=scarcityRaw(p,actions);let num=0,den=0;
+  Object.keys(w).forEach(k=>{const v=k==="scarcity"?sc:(p[k]??70);num+=v*w[k];den+=w[k]});
+  let s=(den?num/den:70)+scoringAdj(p);
+  const c=countsFor(slot,actions),r=state.config.roster,rd=roundOf(actions.length+1),need=starterNeedFor(slot,p.pos,actions);
+  s+=Math.min(9,need*4.4);
+
+  // Position timing / duplication logic
+  if(p.pos==="QB"&&c.QB>=r.QB)s-=rd<10?9:4;
+  if(p.pos==="TE"&&c.TE>=r.TE)s-=rd<9?7:3;
+  if((p.pos==="DST"||p.pos==="K")&&rd<11)s-=24;
+  else if((p.pos==="DST"||p.pos==="K")&&rd<13)s-=10;
+
+  // Bench construction: RB/WR upside dominates late bench spots.
+  if(benchCount(slot,actions)>=0 && rd>=8 && ["RB","WR"].includes(p.pos))s+=1.2;
+  if(rd>=10 && ["RB","WR"].includes(p.pos) && p.risk>=20)s+=1.0;
+
+  // ADP discipline, stronger for predicting opponents.
+  const pick=actions.length+1,delta=pick-p.adp;
+  if(delta>0)s+=Math.min(5.5,delta*.12);
+  if(delta<-12)s-=Math.min(forPrediction?7:5,(-delta-12)*(forPrediction?.13:.09));
+  return clamp(s,1,99.8)
+}
+function floorScore(p,slot=state.config.slot){return clamp(playerScoreForManager(p,slot)-p.risk*.17,1,99)}
+function ceilingScore(p,slot=state.config.slot){return clamp(playerScoreForManager(p,slot)+(p.quality-72)*.12+p.risk*.08,1,99)}
+
+function bestStartersByPos(roster,pos,n){return roster.filter(p=>p.pos===pos).sort((a,b)=>baseWeighted(b)-baseWeighted(a)).slice(0,n)}
+function teamStrength(slot,actions=state.actions){
+  const roster=rosterFor(slot,actions),r=state.config.roster;
+  if(!roster.length)return {overall:0,QB:0,RB:0,WR:0,TE:0,depth:0,ceiling:0,filled:0};
+  const posScores={};
+  ["QB","RB","WR","TE"].forEach(pos=>{
+    const need=r[pos]||0, xs=bestStartersByPos(roster,pos,Math.max(1,need));
+    posScores[pos]=xs.length?xs.reduce((s,p)=>s+baseWeighted(p),0)/Math.max(need,xs.length):0;
+  });
+  const flexPool=roster.filter(p=>["RB","WR","TE"].includes(p.pos)).sort((a,b)=>baseWeighted(b)-baseWeighted(a));
+  const starterVals=[];
+  bestStartersByPos(roster,"QB",r.QB).forEach(p=>starterVals.push(baseWeighted(p)));
+  bestStartersByPos(roster,"RB",r.RB).forEach(p=>starterVals.push(baseWeighted(p)));
+  bestStartersByPos(roster,"WR",r.WR).forEach(p=>starterVals.push(baseWeighted(p)));
+  bestStartersByPos(roster,"TE",r.TE).forEach(p=>starterVals.push(baseWeighted(p)));
+  const usedIds=new Set([
+    ...bestStartersByPos(roster,"RB",r.RB),
+    ...bestStartersByPos(roster,"WR",r.WR),
+    ...bestStartersByPos(roster,"TE",r.TE)
+  ].map(p=>p.id));
+  flexPool.filter(p=>!usedIds.has(p.id)).slice(0,r.FLEX).forEach(p=>starterVals.push(baseWeighted(p)));
+  bestStartersByPos(roster,"DST",r.DST).forEach(p=>starterVals.push(baseWeighted(p)));
+  bestStartersByPos(roster,"K",r.K).forEach(p=>starterVals.push(baseWeighted(p)));
+
+  const expectedStarters=r.QB+r.RB+r.WR+r.TE+r.FLEX+r.DST+r.K;
+  const starterQuality=starterVals.length?starterVals.reduce((a,b)=>a+b,0)/expectedStarters:0;
+  const bench=roster.filter(p=>!starterVals.includes(baseWeighted(p))).map(p=>baseWeighted(p)).sort((a,b)=>b-a);
+  const depth=bench.length?bench.slice(0,Math.min(5,bench.length)).reduce((a,b)=>a+b,0)/Math.min(5,bench.length):0;
+  const ceil=roster.length?roster.map(p=>ceilingScore(p,slot)).sort((a,b)=>b-a).slice(0,Math.min(8,roster.length)).reduce((a,b)=>a+b,0)/Math.min(8,roster.length):0;
+  const filled=Math.min(1,roster.length/totalRosterSlots());
+  const balancePenalty=["QB","RB","WR","TE"].reduce((s,pos)=>s+Math.max(0,(r[pos]||0)-countsFor(slot,actions)[pos]),0)*2.3;
+  const overall=clamp(starterQuality*.67+depth*.15+ceil*.18-balancePenalty,0,99);
+  return {overall,QB:posScores.QB,RB:posScores.RB,WR:posScores.WR,TE:posScores.TE,depth,ceiling:ceil,filled}
+}
+function teamNeedMap(slot,actions=state.actions){
+  const rd=roundOf(actions.length+1),c=countsFor(slot,actions),r=state.config.roster,map={};
+  ["QB","RB","WR","TE","DST","K"].forEach(pos=>{
+    let n=starterNeedFor(slot,pos,actions)*25;
+    if(["RB","WR"].includes(pos))n+=Math.max(0,4-c[pos])*3;
+    if(pos==="QB"&&c.QB===0&&rd>=6)n+=12;
+    if(pos==="TE"&&c.TE===0&&rd>=6)n+=8;
+    if((pos==="DST"||pos==="K")&&rd<11)n-=30;
+    map[pos]=clamp(Math.round(n),0,100)
+  });
+  return map
+}
+
+function deterministicNoise(seed){
+  let h=2166136261;for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619)}
+  return ((h>>>0)%10000)/10000
+}
+function predictedPick(slot,actions,trial){
+  const av=available(actions);if(!av.length)return null;
+  let best=null,bestS=-1e9;
+  for(const p of av){
+    let s=playerScoreForManager(p,slot,actions,true);
+    // Small deterministic "manager personality" and trial variability.
+    s+=(deterministicNoise(`${slot}|${p.id}|${trial}`)-.5)*6.5;
+    // Slight positional preference variation by manager.
+    const pref=(deterministicNoise(`pref|${slot}|${p.pos}`)-.5)*2.8;
+    s+=pref;
+    if(s>bestS){bestS=s;best=p}
+  }
+  return best
+}
+function simulateToHerNext(candidate, trials=60){
+  const startActions=state.actions.slice();
+  const userSlot=state.config.slot;
+  const pickNow=currentPick();
+  if(managerSlotAt(pickNow)!==userSlot)return {survival:{},expectedNext:0,mostTaken:{},teamsLikely:{}};
+
+  const baseAction={kind:"mine",manager:userSlot,playerId:candidate.id,pick:pickNow,ts:0};
+  const target=nextPickForSlot(userSlot,pickNow+1);
+  if(!target)return {survival:{},expectedNext:0,mostTaken:{},teamsLikely:{}};
+
+  const candidatePool=available(startActions).filter(p=>p.id!==candidate.id).slice();
+  const survivedCount={}; const takenBy={}; let expectedNext=0;
+  candidatePool.forEach(p=>survivedCount[p.id]=0);
+
+  for(let t=0;t<trials;t++){
+    let acts=startActions.concat([baseAction]);
+    for(let n=pickNow+1;n<target;n++){
+      const slot=managerSlotAt(n);
+      const pick=predictedPick(slot,acts,t);
+      if(!pick)break;
+      acts.push({kind:"other",manager:slot,playerId:pick.id,pick:n,ts:0});
+      if(!takenBy[pick.id])takenBy[pick.id]={};
+      takenBy[pick.id][slot]=(takenBy[pick.id][slot]||0)+1;
+    }
+    const remaining=available(acts);
+    remaining.forEach(p=>{if(survivedCount[p.id]!==undefined)survivedCount[p.id]++});
+    const top=remaining.map(p=>playerScoreForManager(p,userSlot,acts)).sort((a,b)=>b-a)[0]||0;
+    expectedNext+=top;
+  }
+  expectedNext/=trials;
+  const survival={};Object.keys(survivedCount).forEach(id=>survival[id]=Math.round(survivedCount[id]/trials*100));
+  return {survival,expectedNext,takenBy,target}
+}
+let simCache={key:null,data:null};
+function currentSimulationData(){
+  const key=state.actions.map(a=>a.playerId||"x").join("|")+"|"+JSON.stringify(state.config)+"|"+JSON.stringify(state.weights);
+  if(simCache.key===key)return simCache.data;
+  // Baseline simulation without forcing a candidate: simulate intervening teams from now until her next pick.
+  const userSlot=state.config.slot,pickNow=currentPick(),target=nextPickForSlot(userSlot,pickNow+(managerSlotAt(pickNow)===userSlot?1:0));
+  const trials=70,survivedCount={},takenBy={};available().forEach(p=>survivedCount[p.id]=0);
+  if(!target){simCache={key,data:{survival:{},takenBy:{},target:null}};return simCache.data}
+  for(let t=0;t<trials;t++){
+    let acts=state.actions.slice();
+    let start=pickNow;
+    if(managerSlotAt(start)===userSlot)start++;
+    for(let n=start;n<target;n++){
+      const slot=managerSlotAt(n),pick=predictedPick(slot,acts,t);if(!pick)break;
+      acts.push({kind:"other",manager:slot,playerId:pick.id,pick:n,ts:0});
+      if(!takenBy[pick.id])takenBy[pick.id]={};
+      takenBy[pick.id][slot]=(takenBy[pick.id][slot]||0)+1;
+    }
+    available(acts).forEach(p=>{if(survivedCount[p.id]!==undefined)survivedCount[p.id]++});
+  }
+  const survival={};Object.keys(survivedCount).forEach(id=>survival[id]=Math.round(survivedCount[id]/trials*100));
+  simCache={key,data:{survival,takenBy,target}};return simCache.data
+}
+function survivalProb(p){return currentSimulationData().survival[p.id]??50}
+function likelyTeamsFor(p){
+  const d=currentSimulationData().takenBy[p.id]||{};
+  return Object.entries(d).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([slot,n])=>({slot:Number(slot),pct:Math.round(n/70*100)}))
+}
+function strongestOpponents(){
+  const arr=[];for(let s=1;s<=state.config.teams;s++){if(s!==state.config.slot)arr.push({slot:s,...teamStrength(s)})}
+  return arr.sort((a,b)=>b.overall-a.overall)
+}
+function leagueDenialBonus(p){
+  const strong=strongestOpponents().slice(0,3);let bonus=0;
+  for(const t of strong){
+    const need=teamNeedMap(t.slot)[p.pos]/100;
+    const likelihood=(likelyTeamsFor(p).find(x=>x.slot===t.slot)?.pct||0)/100;
+    bonus+=need*likelihood*(t.overall/100)*2.0;
+  }
+  return Math.min(2.5,bonus)
+}
+function futureFlexBonus(p){
+  if(managerSlotAt(currentPick())!==state.config.slot)return 0;
+  const sim=simulateToHerNext(p,36);
+  return clamp((sim.expectedNext-72)*.07,-1,2.2)
+}
+function leagueAwareScore(p){
+  let s=playerScoreForManager(p,state.config.slot);
+  const surv=survivalProb(p);
+  // Urgency: great players unlikely to return gain value.
+  s+=(50-surv)*.045;
+  // Blocking only as a secondary factor.
+  s+=leagueDenialBonus(p);
+  // Preserve future flexibility by rewarding candidates that leave a good board later.
+  s+=futureFlexBonus(p);
+  return clamp(s,1,99.9)
+}
+function ranked(){
+  return available().map(p=>({...p,score:leagueAwareScore(p)})).sort((a,b)=>b.score-a.score)
+}
+function explanation(p){
+  const likely=likelyTeamsFor(p).filter(x=>x.pct>=10);
+  const survival=survivalProb(p),need=teamNeedMap(state.config.slot)[p.pos];
+  const pieces=[];
+  pieces.push(`${p.pos} fit for her roster is ${need>=60?"high":need>=30?"moderate":"currently low"}, while his league-aware value is ${leagueAwareScore(p).toFixed(1)}/100.`);
+  if(survival<=35)pieces.push(`The model gives him only about a ${survival}% chance to survive to her next pick, which creates urgency.`);
+  else if(survival>=70)pieces.push(`He has about a ${survival}% chance to survive to her next pick, so waiting is more realistic.`);
+  if(likely.length)pieces.push(`Most likely teams to take him before her next turn: ${likely.map(x=>`${state.teamNames[x.slot-1]} (${x.pct}%)`).join(", ")}.`);
+  const denial=leagueDenialBonus(p);if(denial>1)pieces.push(`There is also a modest strategic-blocking benefit because stronger opponents have a meaningful need at ${p.pos}.`);
+  pieces.push(p.note||"");
+  return pieces.join(" ")
+}
+
+function render(){
+  normalizeState();save();simCache.key=null;
+  const cp=currentPick(),cm=currentManager(),next=herNextPick(cp);
+  document.getElementById("statPick").textContent=pickLabel(cp);
+  document.getElementById("statTeam").textContent=state.teamNames[cm-1];
+  document.getElementById("statNext").textContent=next?pickLabel(next):"—";
+  const hs=teamStrength(state.config.slot);document.getElementById("statStrength").textContent=hs.overall?hs.overall.toFixed(1):"—";
+  document.getElementById("statGone").textContent=state.actions.filter(a=>a.playerId).length;
+  renderClock();renderQuickResults();renderBoard();renderLeague();renderStrategy();renderSettings()
+}
+function renderClock(){
+  const list=ranked(),best=list[0],box=document.getElementById("bestPick"),alts=document.getElementById("alternatives");
+  const isHer=currentManager()===state.config.slot;
+  document.getElementById("currentTurnExplain").innerHTML=`Pick <b>${pickLabel(currentPick())}</b> belongs to <b>${state.teamNames[currentManager()-1]}</b>. ${isHer?"This is her selection. The recommendations below optimize her team against the full league.":"Record the player this manager drafts; the app will automatically place him on that roster."}`;
+  if(!best){box.innerHTML="<div class='muted'>No available players.</div>";alts.innerHTML="";return}
+  const top=list.slice(0,10);
+  const safest=[...top].sort((a,b)=>floorScore(b)-floorScore(a))[0];
+  const upside=[...top].sort((a,b)=>ceilingScore(b)-ceilingScore(a))[0];
+  const value=[...top].sort((a,b)=>(currentPick()-b.adp)-(currentPick()-a.adp))[0];
+  const tags=[];if(best.id===safest.id)tags.push("Safest");if(best.id===upside.id)tags.push("Highest upside");if(best.id===value.id)tags.push("Best value");
+  box.innerHTML=`<div class="clockhero">
+    <div class="clocktag">${isHer?"HER BEST PICK":"PROJECTED BEST FOR HER NEXT TURN"}</div>
+    <div class="pickname">${best.name}</div>
+    <div class="meta"><span>${best.pos} • ${best.team}</span><span>Market ~${best.adp}</span><span>${tags.join(" • ")}</span></div>
+    <div class="score"><span>League-Aware Score</span><b>${best.score.toFixed(1)}</b><span>/100</span></div>
+    <div class="reason">${explanation(best)}</div>
+    <div class="chips"><span class="badge good">Floor ${Math.round(floorScore(best))}</span><span class="badge good">Ceiling ${Math.round(ceilingScore(best))}</span><span class="badge ${best.risk>=26?"risk":"warn"}">Risk ${best.risk}</span><span class="badge">Next-turn survival ${survivalProb(best)}%</span></div>
+    <div style="height:12px"></div>
+    ${isHer?`<div class="actions"><button class="btn primary" onclick="draftPlayer('${best.id}')">Draft ${best.name}</button></div>`:`<div class="callout">Another manager is currently picking. Record their actual selection below rather than drafting this recommendation.</div>`}
+  </div>`;
+  alts.innerHTML=list.slice(1,6).map((p,i)=>`<div class="player"><div class="rank">${i+2}</div><div><div class="pname">${p.name}</div><div class="pmeta">${p.pos} • ${p.team} • survival ${survivalProb(p)}%</div></div><div class="pscore"><strong>${p.score.toFixed(1)}</strong>${isHer?`<div><button class="btn small good" onclick="draftPlayer('${p.id}')">Draft</button></div>`:""}</div></div>`).join("")
+}
+function renderQuickResults(){
+  const q=(document.getElementById("quickSearch")?.value||"").trim().toLowerCase();
+  let list=available().filter(p=>!q||(p.name+" "+p.team+" "+p.pos).toLowerCase().includes(q)).slice();
+  list.sort((a,b)=>a.adp-b.adp);
+  if(!q)list=list.slice(0,8);else list=list.slice(0,12);
+  document.getElementById("quickResults").innerHTML=list.map(p=>`<div class="player"><div class="rank">${p.adp}</div><div><div class="pname">${p.name}</div><div class="pmeta">${p.pos} • ${p.team}</div></div><div class="pscore"><button class="btn small ${currentManager()===state.config.slot?"good":""}" onclick="draftPlayer('${p.id}')">Assign to ${state.teamNames[currentManager()-1]}</button></div></div>`).join("")
+}
+function renderFilters(){const fs=["ALL","QB","RB","WR","TE","DST","K"];document.getElementById("filters").innerHTML=fs.map(f=>`<button class="filter ${state.filter===f?"active":""}" onclick="state.filter='${f}';renderBoard();save()">${f}</button>`).join("")}
+function renderBoard(){
+  renderFilters();const q=(document.getElementById("search")?.value||"").trim().toLowerCase(),mode=document.getElementById("sortMode")?.value||"league";
+  let list=available().filter(p=>(state.filter==="ALL"||p.pos===state.filter)&&(!q||(p.name+" "+p.team+" "+p.pos).toLowerCase().includes(q))).map(p=>({...p,lscore:leagueAwareScore(p),bscore:playerScoreForManager(p,state.config.slot)}));
+  if(mode==="league")list.sort((a,b)=>b.lscore-a.lscore);if(mode==="base")list.sort((a,b)=>b.bscore-a.bscore);if(mode==="adp")list.sort((a,b)=>a.adp-b.adp);if(mode==="ceiling")list.sort((a,b)=>ceilingScore(b)-ceilingScore(a));
+  document.getElementById("boardRows").innerHTML=list.map((p,i)=>`<div class="boardrow"><div class="rank">${i+1}</div><div class="namecell"><div class="pname">${p.name}</div><div class="pmeta">${p.pos} • ${p.team} • market ~${p.adp}</div></div><div><strong>${p.lscore.toFixed(1)}</strong><div class="pmeta">base ${p.bscore.toFixed(1)}</div></div><div class="avail">${survivalProb(p)}%</div><div class="actions"><button class="btn small ${currentManager()===state.config.slot?"good":""}" onclick="draftPlayer('${p.id}')">Assign current pick</button></div></div>`).join("")||"<div class='muted'>No matching players.</div>"
+}
+function rosterSummary(slot){
+  const roster=rosterFor(slot),c=countsFor(slot);if(!roster.length)return "No players drafted yet.";
+  return ["QB","RB","WR","TE","DST","K"].filter(pos=>c[pos]).map(pos=>`<b>${pos}</b>: ${roster.filter(p=>p.pos===pos).map(p=>p.name).join(", ")}`).join("<br>")
+}
+function renderLeague(){
+  const cm=currentManager();
+  document.getElementById("teamGrid").innerHTML=Array.from({length:state.config.teams},(_,i)=>i+1).map(slot=>{
+    const s=teamStrength(slot),needs=teamNeedMap(slot),roster=rosterFor(slot);
+    const topNeeds=Object.entries(needs).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>15).slice(0,3);
+    return `<div class="teamcard ${slot===state.config.slot?"me":""} ${slot===cm?"current":""}">
+      <div class="teamtop"><div><div class="teamname">${state.teamNames[slot-1]} ${slot===state.config.slot?"★":""}</div><div class="teampos">Draft slot ${slot} • ${roster.length}/${totalRosterSlots()} players</div></div><div class="strength">${s.overall?s.overall.toFixed(1):"—"}</div></div>
+      <div class="smallgrid"><div class="metric"><span>QB</span><b>${s.QB?Math.round(s.QB):"—"}</b></div><div class="metric"><span>RB</span><b>${s.RB?Math.round(s.RB):"—"}</b></div><div class="metric"><span>WR</span><b>${s.WR?Math.round(s.WR):"—"}</b></div><div class="metric"><span>TE</span><b>${s.TE?Math.round(s.TE):"—"}</b></div></div>
+      <div class="rosterline">${rosterSummary(slot)}</div>
+      <div class="needline">${topNeeds.map(([p,v])=>`<span class="needpill ${v>=55?"hot":""}">${p} need ${v}</span>`).join("")}</div>
+    </div>`
+  }).join("");
+  document.getElementById("draftLog").innerHTML=[...state.actions].reverse().slice(0,60).map(a=>{
+    const p=a.playerId?state.players.find(x=>x.id===a.playerId):null;
+    return `<div class="logrow"><div class="logpick">${pickLabel(a.pick)}</div><div><b>${state.teamNames[a.manager-1]}</b> — ${p?`${p.name} (${p.pos}, ${p.team})`:"Unknown player"}</div><button class="btn small ghost" onclick="undoTo(${a.pick})">Undo to here</button></div>`
+  }).join("")||"<div class='muted'>No picks recorded yet.</div>"
+}
+function renderStrategy(){
+  const her=teamStrength(state.config.slot),opp=strongestOpponents(),top=ranked().slice(0,6),sim=currentSimulationData(),next=herNextPick(currentPick());
+  const threatRows=top.map(p=>{
+    const teams=likelyTeamsFor(p).filter(x=>x.pct>=8);
+    return `<div class="player"><div class="rank">${Math.round(p.score)}</div><div><div class="pname">${p.name}</div><div class="pmeta">${p.pos} • ${p.team}</div></div><div class="pscore"><strong>${survivalProb(p)}%</strong><div class="pmeta">survival</div></div><div style="grid-column:2/4" class="pmeta">${teams.length?`Threats: ${teams.map(x=>`${state.teamNames[x.slot-1]} ${x.pct}%`).join(" • ")}`:"No concentrated opponent threat detected."}</div></div>`
+  }).join("");
+  document.getElementById("strategyBody").innerHTML=`
+    <div class="grid2">
+      <div class="callout"><b>Her roster strength:</b> ${her.overall?her.overall.toFixed(1):"not enough picks yet"}. ${opp[0]?.overall?`Current strongest opponent: <b>${state.teamNames[opp[0].slot-1]}</b> at ${opp[0].overall.toFixed(1)}.`:""} The model uses opponent strength only as a secondary tiebreaker; it will not sacrifice meaningful value just to block another manager.</div>
+      <div class="callout"><b>Next turn:</b> ${next?pickLabel(next):"—"}. Survival percentages below are simulated from the specific teams scheduled to pick before her next turn and their current roster needs.</div>
+    </div>
+    <div style="height:12px"></div><h3>Players most relevant to the next turn</h3><div class="altlist">${threatRows}</div>`
+}
+function renderSettings(){
+  const cfg=state.config;
+  [["teams",cfg.teams],["slot",cfg.slot],["scoring",cfg.scoring],["rqQB",cfg.roster.QB],["rqRB",cfg.roster.RB],["rqWR",cfg.roster.WR],["rqTE",cfg.roster.TE],["rqFLEX",cfg.roster.FLEX],["rqDST",cfg.roster.DST],["rqK",cfg.roster.K],["rqBENCH",cfg.roster.BENCH]].forEach(([id,v])=>{const el=document.getElementById(id);if(el&&document.activeElement!==el)el.value=v});
+  document.getElementById("teamNames").innerHTML=Array.from({length:cfg.teams},(_,i)=>`<div class="field"><label>Draft slot ${i+1}${i+1===cfg.slot?" (Her)":""}</label><input class="input" value="${escapeHtml(state.teamNames[i]||`Team ${i+1}`)}" onchange="renameTeam(${i},this.value)"></div>`).join("");
+  document.getElementById("weights").innerHTML=Object.keys(state.weights).map(k=>`<div class="weightrow"><div>${LABELS[k]}</div><input type="range" min="0" max="40" step="1" value="${state.weights[k]}" oninput="setWeight('${k}',this.value)"><div><b>${state.weights[k]}</b></div></div>`).join("")
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function renameTeam(i,v){state.teamNames[i]=v.trim()||`Team ${i+1}`;render()}
+function setWeight(k,v){state.weights[k]=Number(v);render()}
+function updateConfig(){
+  const oldTeams=state.config.teams;
+  state.config.teams=clamp(Number(document.getElementById("teams").value)||10,4,20);
+  state.config.slot=clamp(Number(document.getElementById("slot").value)||6,1,state.config.teams);
+  state.config.scoring=document.getElementById("scoring").value;
+  ["QB","RB","WR","TE","FLEX","DST","K","BENCH"].forEach(p=>state.config.roster[p]=Number(document.getElementById("rq"+p).value)||0);
+  while(state.teamNames.length<state.config.teams)state.teamNames.push(`Team ${state.teamNames.length+1}`);
+  state.teamNames=state.teamNames.slice(0,state.config.teams);
+  if(state.actions.length && oldTeams!==state.config.teams){alert("Team count changed after picks were recorded. Resetting is recommended because snake-pick ownership changes.");}
+  render()
+}
+function draftPlayer(id){
+  const p=state.players.find(x=>x.id===id);if(!p||goneSet().has(id))return;
+  const manager=currentManager(),kind=manager===state.config.slot?"mine":"other";
+  state.actions.push({kind,manager,playerId:id,pick:currentPick(),ts:Date.now()});
+  document.getElementById("quickSearch").value="";
+  toast(`${p.name} → ${state.teamNames[manager-1]}`);render()
+}
+function advanceUnknown(){const manager=currentManager();state.actions.push({kind:"unknown",manager,playerId:null,pick:currentPick(),ts:Date.now()});toast(`Advanced ${state.teamNames[manager-1]}'s pick.`);render()}
+function undoLast(){if(!state.actions.length){toast("Nothing to undo.");return}const a=state.actions.pop();toast(`Undid pick ${pickLabel(a.pick)}.`);render()}
+function undoTo(pick){while(state.actions.length && state.actions[state.actions.length-1].pick>=pick)state.actions.pop();toast(`Rewound to pick ${pickLabel(pick)}.`);render()}
+function showTab(id){document.querySelectorAll(".tabpage").forEach(x=>x.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab===id));window.scrollTo({top:0,behavior:"smooth"})}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.classList.remove("show"),1900)}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+function copyAISync(){
+  const league=Array.from({length:state.config.teams},(_,i)=>i+1).map(slot=>`${state.teamNames[slot-1]}: ${rosterFor(slot).map(p=>`${p.name} (${p.pos})`).join(", ")||"empty"}`).join("\n");
+  const top=ranked().slice(0,12).map(p=>`${p.name} (${p.pos}, ${p.team}) score ${leagueAwareScore(p).toFixed(1)}, survival ${survivalProb(p)}%`).join("; ");
+  const prompt=`Act as my live 2026 ESPN fantasy football draft copilot. This is a ${state.config.teams}-team snake league. My friend drafts from slot #${state.config.slot}. Roster: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX (RB/WR/TE), 1 D/ST, 1 K, 7 bench. Scoring setting selected in the local app: ${state.config.scoring}. Current pick is ${pickLabel(currentPick())}, owned by ${state.teamNames[currentManager()-1]}.
+
+FULL LEAGUE ROSTERS:
+${league}
+
+The local league-aware model currently ranks the top available candidates as:
+${top}
+
+Use CURRENT web information. Verify 2026 injuries, suspensions, depth charts, offensive-line changes, head coaches and offensive coordinators, defensive coordinators, team schedules, opponent scheme tendencies, player-specific matchup fit, and Weeks 15-17 fantasy playoff schedules.
+
+Analyze not only my friend's roster, but all nine opponents: their open starter slots, bench construction, positional strength/weakness, likely next positional needs, and which players are most likely to be selected before her next turn. Opponent-blocking value is secondary to maximizing her expected championship roster.
+
+Return:
+1. BEST PICK now
+2. next four options
+3. safest pick
+4. highest-upside pick
+5. best value
+6. best strategic pick
+7. estimated chance each survives to her next turn
+8. the specific teams most likely to draft each player
+9. how the choice changes her roster strength relative to the strongest opponent
+10. any urgent live-news reason that should override the local model.
+
+Keep it concise because she may be on the clock.`;
+  navigator.clipboard?.writeText(prompt).then(()=>toast("Full-league ChatGPT prompt copied.")).catch(()=>{
+    document.getElementById("modalTitle").textContent="Copy Full League Prompt";
+    document.getElementById("modalBody").innerHTML=`<textarea id="copyArea" style="width:100%;min-height:280px" class="textarea"></textarea><div style="height:8px"></div><button class="btn primary" onclick="document.getElementById('copyArea').select()">Select All</button>`;
+    document.getElementById("copyArea").value=prompt;document.getElementById("modal").classList.add("show")
+  })
+}
+function exportState(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="nova-draft-war-room-2026-state.json";a.click();URL.revokeObjectURL(a.href)}
+function importState(evt){const f=evt.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);normalizeState();render();toast("Draft state imported.")}catch(e){toast("Import failed.")}};r.readAsText(f)}
+function resetDraft(){if(!confirm("Reset all draft picks and settings?"))return;state=freshState();normalizeState();render();toast("Draft reset.")}
+render();
+</script>
+</body>
+</html>
